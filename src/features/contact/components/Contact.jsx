@@ -3,93 +3,32 @@ import Typography from '@mui/material/Typography';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
-import { siWhatsapp } from 'simple-icons';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { PROFILE } from '@/data/profile.js';
 import { Section, Reveal, Card, IconTile, SocialLinks } from '@/shared/components/ui';
 import ContactForm from './ContactForm.jsx';
 import ContactMapCard from './ContactMapCard.jsx';
 import { useLanguage } from '@/i18n';
 
-function WhatsAppRow({ phone, phoneIntl }) {
-  const { t } = useLanguage();
-  const cleanPhone = (phoneIntl ?? phone).replace(/\D/g, '');
-  const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-    'Hello Ahmed, I saw your portfolio and would like to discuss a project.'
-  )}`;
-
-  return (
-    <Box
-      component="a"
-      href={waUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        p: 1.5,
-        borderRadius: 2,
-        textDecoration: 'none',
-        bgcolor: (theme) =>
-          theme.palette.mode === 'dark' ? 'rgba(37, 211, 102, 0.1)' : 'rgba(37, 211, 102, 0.08)',
-        border: '1px solid',
-        borderColor: (theme) =>
-          theme.palette.mode === 'dark' ? 'rgba(37, 211, 102, 0.3)' : 'rgba(37, 211, 102, 0.35)',
-        transition: 'all 0.25s ease',
-        '&:hover': {
-          bgcolor: (theme) =>
-            theme.palette.mode === 'dark' ? 'rgba(37, 211, 102, 0.2)' : 'rgba(37, 211, 102, 0.16)',
-          borderColor: '#25D366',
-          transform: 'translateY(-2px)',
-          boxShadow: '0 6px 16px rgba(37, 211, 102, 0.2)',
-        },
-      }}
-    >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Box
-          component="svg"
-          viewBox="0 0 24 24"
-          sx={{ width: 26, height: 26, fill: '#25D366', flexShrink: 0 }}
-        >
-          <path d={siWhatsapp.path} />
-        </Box>
-        <Box>
-          <Typography variant="body2" sx={{ fontWeight: 700, color: 'text.primary', lineHeight: 1.2 }}>
-            {t('contact.whatsappTitle', 'Chat on WhatsApp')}
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
-            {t('contact.whatsappSubtitle', 'Direct messaging')} · {phone}
-          </Typography>
-        </Box>
-      </Box>
-      <Typography
-        variant="caption"
-        sx={{
-          fontWeight: 700,
-          color: '#25D366',
-          px: 1.25,
-          py: 0.5,
-          borderRadius: 1,
-          bgcolor: 'rgba(37, 211, 102, 0.12)',
-        }}
-      >
-        {t('contact.whatsappBtn', 'Open Chat →')}
-      </Typography>
-    </Box>
-  );
-}
-
-function ContactRow({ icon, label, value, href }) {
+function ContactRow({ icon, label, value, href, iconSx }) {
   if (!value) return null;
 
   const content = (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-      <IconTile icon={icon} size={44} />
+      <IconTile icon={icon} size={44} sx={iconSx} />
       <Box sx={{ minWidth: 0 }}>
         <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }}>
           {label}
         </Typography>
-        <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 600, overflowWrap: 'anywhere' }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.primary',
+            fontWeight: 600,
+            overflowWrap: 'anywhere',
+            transition: 'color .2s ease',
+          }}
+        >
           {value}
         </Typography>
       </Box>
@@ -101,7 +40,14 @@ function ContactRow({ icon, label, value, href }) {
     <Box
       component="a"
       href={href}
-      sx={{ display: 'block', borderRadius: 2, '&:hover p': { color: 'primary.main' } }}
+      target={href.startsWith('http') ? '_blank' : undefined}
+      rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
+      sx={{
+        display: 'block',
+        borderRadius: 2,
+        textDecoration: 'none',
+        '&:hover .MuiTypography-body2': { color: 'primary.main' },
+      }}
     >
       {content}
     </Box>
@@ -111,6 +57,12 @@ function ContactRow({ icon, label, value, href }) {
 export default function Contact() {
   const { email, phone, phoneIntl } = PROFILE.contact;
   const { t, lang } = useLanguage();
+  const cleanPhone = (phoneIntl ?? phone).replace(/\D/g, '');
+  const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+    lang === 'ar'
+      ? 'مرحباً أحمد، اطلعت على معرض أعمالك وأود مناقشة مشروع معك.'
+      : 'Hello Ahmed, I saw your portfolio and would like to discuss a project.'
+  )}`;
 
   return (
     <Section
@@ -147,7 +99,13 @@ export default function Contact() {
                   value={phone}
                   href={`tel:${phoneIntl ?? phone}`}
                 />
-                <WhatsAppRow phone={phone} phoneIntl={phoneIntl} />
+                <ContactRow
+                  icon={WhatsAppIcon}
+                  label={lang === 'ar' ? 'واتساب' : 'WhatsApp'}
+                  value={phone}
+                  href={waUrl}
+                  iconSx={{ color: '#25D366' }}
+                />
                 <ContactRow
                   icon={PlaceOutlinedIcon}
                   label={lang === 'ar' ? 'الموقع' : 'Based in'}
