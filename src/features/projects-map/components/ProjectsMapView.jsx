@@ -9,14 +9,13 @@ import '@arcgis/map-components/components/arcgis-home';
 import '@arcgis/map-components/components/arcgis-expand';
 import '@arcgis/map-components/components/arcgis-basemap-gallery';
 import '@arcgis/map-components/main.css';
-import FeatureLayer from '@arcgis/core/layers/FeatureLayer.js';
 import Graphic from '@arcgis/core/Graphic.js';
-import Box from '@mui/material/Box';
-import CircularProgress from '@mui/material/CircularProgress';
-import Typography from '@mui/material/Typography';
 import Point from '@arcgis/core/geometry/Point.js';
 import Basemap from '@arcgis/core/Basemap.js';
 import LocalBasemapsSource from '@arcgis/core/widgets/BasemapGallery/support/LocalBasemapsSource.js';
+import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
+import Typography from '@mui/material/Typography';
 import { basemapFor, friendlyNavigation } from '@services/arcgis/config.js';
 import { getMappedProjects, getProjectPath, formatProjectNumber } from '@/data/projects.js';
 import { PROJECT_TYPES, getProjectType, getProjectTypeLabel } from '@/data/projectTypes.js';
@@ -28,7 +27,7 @@ import { useLanguage } from '@/i18n';
 // Initial view: Egypt and Saudi Arabia, where every mapped project sits.
 const CENTER = [37.5, 26];
 
-// "Show on map" zooms in far enough that a project is no longer inside a cluster.
+// "Show on map" zooms in far enough that a project is clearly focused.
 const FOCUS_ZOOM = 12;
 
 // The classic vector basemaps need no access token, so the gallery works with or without an API key.
@@ -37,67 +36,6 @@ const BASEMAP_GALLERY = new LocalBasemapsSource({
     (id) => Basemap.fromId(id),
   ),
 });
-
-// Nearby projects merge into a numbered cluster and break apart as the map zooms in.
-const CLUSTERING = {
-  type: 'cluster',
-  clusterRadius: '75px',
-  clusterMinSize: '30px',
-  clusterMaxSize: '52px',
-  popupTemplate: {
-    title: '{cluster_count} projects in this area',
-    content: 'Click the cluster to zoom in and explore the individual projects.',
-    fieldInfos: [{ fieldName: 'cluster_count', format: { places: 0, digitSeparator: true } }],
-  },
-  labelingInfo: [
-    {
-      deconflictionStrategy: 'none',
-      labelPlacement: 'center-center',
-      labelExpressionInfo: { expression: 'Text($feature.cluster_count, "#,###")' },
-      symbol: {
-        type: 'text',
-        color: '#ffffff',
-        font: { size: 12, weight: 'bold', family: 'Noto Sans' },
-        haloColor: [15, 23, 42, 0.85],
-        haloSize: 1.2,
-      },
-    },
-  ],
-};
-
-const FIELDS = [
-  { name: 'oid', type: 'oid' },
-  { name: 'pid', type: 'integer' },
-  { name: 'num', type: 'string' },
-  { name: 'title', type: 'string' },
-  { name: 'summary', type: 'string' },
-  { name: 'type', type: 'string' },
-  { name: 'year', type: 'string' },
-  { name: 'place', type: 'string' },
-  { name: 'path', type: 'string' },
-  { name: 'code', type: 'string' },
-];
-
-const toGraphic = (project, i, lang) => {
-  const type = getProjectType(project);
-  const title = lang === 'ar' && project.titleAr ? project.titleAr : project.title;
-  const summary = lang === 'ar' && project.summaryAr ? project.summaryAr : project.summary;
-  return new Graphic({
-    geometry: new Point({ longitude: project.location.lng, latitude: project.location.lat }),
-    attributes: {
-      oid: i + 1,
-      pid: project.id,
-      num: formatProjectNumber(project.id),
-      title,
-      summary,
-      type,
-      year: String(project.year ?? safeText(project.period) ?? ''),
-      place: lang === 'ar' && project.location.labelAr ? project.location.labelAr : project.location.label,
-      path: getProjectPath(project),
-      code: project.type === 'client' ? '' : (safeUrl(project.links?.code) ?? ''),
-    },
-  });
-};
 
 // Popup body built as DOM so the "View project" button can use client-side routing.
 const buildPopup = (attrs, navigate, lang) => {
@@ -144,12 +82,11 @@ const buildPopup = (attrs, navigate, lang) => {
 };
 
 /**
- * A compact legend of our own: the built-in one grows a bulky "number of features" section
- * once clustering is on. Static on purpose — the colours are the site's project-type colours.
+ * A compact legend of our own matching the site's project-type colours.
  */
 function MapLegend() {
   const { lang } = useLanguage();
-  const dot = (color, extra) => ({
+  const dot = (color) => ({
     width: 12,
     height: 12,
     borderRadius: '50%',
@@ -157,7 +94,6 @@ function MapLegend() {
     backgroundColor: color,
     border: '2px solid #fff',
     boxShadow: '0 0 0 1px rgba(15, 23, 42, 0.25)',
-    ...extra,
   });
 
   return (
@@ -185,28 +121,17 @@ function MapLegend() {
       {PROJECT_TYPES.map((t) => (
         <Box key={t.key} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box sx={dot(PROJECT_TYPE_COLORS[t.key])} />
-          {lang === 'ar'
-            ? t.key === 'fullstack'
-              ? 'تطوير شامل (Full-Stack)'
-              : t.key === 'gis'
-              ? 'نظم معلومات جغرافية (GIS)'
-              : 'ذكاء اصطناعي (AI)'
-            : t.label}
+          <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 500 }}>
+            {lang === 'ar'
+              ? t.key === 'fullstack'
+                ? 'تطوير شامل (Full-Stack)'
+                : t.key === 'gis'
+                ? 'نظم معلومات جغرافية (GIS)'
+                : 'ذكاء اصطناعي (AI)'
+              : t.label}
+          </Typography>
         </Box>
       ))}
-      <Box
-        sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5, pt: 0.75, borderTop: '1px solid', borderColor: 'divider' }}
-      >
-        <Box
-          sx={dot('#4648d4', {
-            width: 16,
-            height: 16,
-            border: '2.5px solid #fff',
-            boxShadow: '0 0 0 3px rgba(70, 72, 212, 0.35)',
-          })}
-        />
-        {lang === 'ar' ? 'مشاريع متجمعة (اضغط للتكبير)' : 'Several nearby — click to zoom'}
-      </Box>
     </Box>
   );
 }
@@ -216,15 +141,14 @@ export default function ProjectsMapView({ mode }) {
   const navigate = useNavigate();
   const focus = useSelector(selectMapFocus);
   const mapRef = useRef(null);
-  const layerRef = useRef(null);
+  const viewRef = useRef(null);
+  const graphicsRef = useRef([]);
+  const addedRef = useRef(false);
   const [ready, setReady] = useState(false);
-  // True once the layer has drawn its first frame (the points take a few seconds).
   const [settled, setSettled] = useState(false);
   const [filter, setFilter] = useState('all');
   const [handledNonce, setHandledNonce] = useState(focus.nonce);
 
-  // A new "Show on map" request clears the type filter so the target is visible.
-  // (State adjusted during render rather than in an effect, per React guidance.)
   if (focus.nonce !== handledNonce) {
     setHandledNonce(focus.nonce);
     if (filter !== 'all') setFilter('all');
@@ -232,69 +156,108 @@ export default function ProjectsMapView({ mode }) {
 
   const projects = getMappedProjects();
 
-  const addFeatureLayer = useCallback(
-    (map) => {
-      if (!map || layerRef.current) return;
+  const initGraphics = useCallback(
+    async (mapEl) => {
+      if (!mapEl || addedRef.current) return;
       try {
-        const layer = new FeatureLayer({
-          title: 'Projects',
-          source: projects.map((p, i) => toGraphic(p, i, lang)),
-          fields: FIELDS,
-          objectIdField: 'oid',
-          geometryType: 'point',
-          spatialReference: { wkid: 4326 },
-          outFields: ['*'],
-          featureReduction: {
-            ...CLUSTERING,
+        if (typeof mapEl.componentOnReady === 'function') {
+          await mapEl.componentOnReady();
+        }
+        const view = mapEl.view;
+        if (!view) return;
+
+        await view.when();
+        if (addedRef.current) return;
+        addedRef.current = true;
+        viewRef.current = view;
+
+        friendlyNavigation(view);
+
+        const graphics = [];
+        projects.forEach((p, i) => {
+          const type = getProjectType(p);
+          const title = lang === 'ar' && p.titleAr ? p.titleAr : p.title;
+          const summary = lang === 'ar' && p.summaryAr ? p.summaryAr : p.summary;
+          const num = formatProjectNumber(p.id);
+
+          const pin = new Graphic({
+            geometry: new Point({ longitude: p.location.lng, latitude: p.location.lat }),
             symbol: {
               type: 'simple-marker',
               style: 'circle',
-              color: [70, 72, 212, 0.92],
-              outline: { color: [255, 255, 255, 0.95], width: 2.5 },
+              size: 16,
+              color: PROJECT_TYPE_COLORS[type],
+              outline: { color: '#ffffff', width: 2.5 },
             },
-          },
-          renderer: {
-            type: 'unique-value',
-            field: 'type',
-            legendOptions: { title: 'Project type' },
-            uniqueValueInfos: PROJECT_TYPES.map((t) => ({
-              value: t.key,
-              label: t.label,
-              symbol: {
-                type: 'simple-marker',
-                style: 'circle',
-                size: 16,
-                color: PROJECT_TYPE_COLORS[t.key],
-                outline: { color: '#ffffff', width: 2 },
-              },
-            })),
-          },
-          labelingInfo: [
-            {
-              labelExpressionInfo: { expression: '$feature.num' },
-              labelPlacement: 'above-center',
-              symbol: {
-                type: 'text',
-                color: '#0f172a',
-                haloColor: '#ffffff',
-                haloSize: 1.5,
-                font: { size: 10, weight: 'bold', family: 'Noto Sans' },
-              },
+            attributes: {
+              oid: i + 1,
+              pid: p.id,
+              num,
+              title,
+              summary,
+              type,
+              year: String(p.year ?? safeText(p.period) ?? ''),
+              place: lang === 'ar' && p.location.labelAr ? p.location.labelAr : p.location.label,
+              path: getProjectPath(p),
+              code: p.type === 'client' ? '' : (safeUrl(p.links?.code) ?? ''),
             },
-          ],
-          popupTemplate: {
-            title: '{num} · {title}',
-            outFields: ['*'],
-            content: ({ graphic }) => buildPopup(graphic.attributes, navigate, lang),
-          },
+            popupTemplate: {
+              title: '{num} · {title}',
+              content: ({ graphic }) => buildPopup(graphic.attributes, navigate, lang),
+            },
+          });
+
+          const label = new Graphic({
+            geometry: new Point({ longitude: p.location.lng, latitude: p.location.lat }),
+            symbol: {
+              type: 'text',
+              text: num,
+              color: '#0f172a',
+              haloColor: '#ffffff',
+              haloSize: 2,
+              font: { size: 10, weight: 'bold', family: 'Noto Sans, sans-serif' },
+              yoffset: 14,
+            },
+            attributes: {
+              pid: p.id,
+              type,
+              isLabel: true,
+            },
+          });
+
+          graphics.push(pin, label);
         });
 
-        map.add(layer);
-        layerRef.current = layer;
+        view.graphics.addMany(graphics);
+        graphicsRef.current = graphics;
+
+        // Click handler: if user clicks the number label, open the main pin's popup
+        view.on('click', async (evt) => {
+          const response = await view.hitTest(evt).catch(() => null);
+          const hit = response?.results?.find((r) => r.graphic?.attributes?.pid);
+          if (hit) {
+            const targetPin = hit.graphic.attributes?.isLabel
+              ? graphicsRef.current?.find((g) => g.attributes.pid === hit.graphic.attributes.pid && !g.attributes.isLabel)
+              : hit.graphic;
+            if (targetPin) {
+              view.openPopup({ features: [targetPin], location: targetPin.geometry });
+            }
+          }
+        });
+
+        // Hover cursor pointer
+        view.on('pointer-move', async (evt) => {
+          const response = await view.hitTest(evt).catch(() => null);
+          const hasPin = response?.results?.some((r) => r.graphic?.attributes?.pid);
+          if (view.container) {
+            view.container.style.cursor = hasPin ? 'pointer' : 'default';
+          }
+        });
+
         setReady(true);
         setSettled(true);
       } catch (err) {
-        console.warn('Error creating projects layer:', err);
+        console.warn('Error initializing projects graphics:', err);
         setReady(true);
         setSettled(true);
       }
@@ -303,71 +266,23 @@ export default function ProjectsMapView({ mode }) {
   );
 
   const onViewReady = useCallback(
-    async (event) => {
-      // 1. Immediately flag ready so UI controls and state activate without delay
+    (event) => {
       setReady(true);
-
       const mapEl = event?.target ?? event;
-      if (!mapEl) return;
-
-      try {
-        if (typeof mapEl.componentOnReady === 'function') {
-          await mapEl.componentOnReady();
-        }
-
-        const map = mapEl.map || mapEl.view?.map;
-        if (map && !layerRef.current) {
-          addFeatureLayer(map);
-        }
-
-        const view = mapEl.view;
-        if (!view) return;
-
-        // Friendly navigation in its own try/catch so it never blocks layer rendering
-        try {
-          friendlyNavigation(view);
-        } catch (e) {
-          console.warn('Friendly navigation setup skipped:', e);
-        }
-
-        // Cluster hit-testing in its own try/catch
-        try {
-          view.on('click', async (evt) => {
-            const response = await view.hitTest(evt).catch(() => null);
-            const clusterHit = response?.results?.find((r) => r.graphic?.isAggregate);
-            if (clusterHit?.graphic?.geometry) {
-              view
-                .goTo({ target: clusterHit.graphic.geometry, zoom: view.zoom + 2 }, { duration: 600 })
-                .catch(() => {});
-            }
-          });
-        } catch (e) {
-          console.warn('Cluster hit test setup skipped:', e);
-        }
-
-        // Await view readiness to ensure layer is attached if map wasn't ready synchronously
-        await view.when();
-        const activeMap = view.map || mapEl.map;
-        if (activeMap && !layerRef.current) {
-          addFeatureLayer(activeMap);
-        }
-      } catch (err) {
-        console.warn('Error in onViewReady:', err);
-      } finally {
-        setSettled(true);
+      if (mapEl) {
+        initGraphics(mapEl);
       }
     },
-    [addFeatureLayer],
+    [initGraphics],
   );
 
-  // Native event listener & immediate check for Safari iOS compatibility
   useEffect(() => {
     const mapEl = mapRef.current;
     if (!mapEl) return undefined;
 
     const handleReady = () => {
-      if (mapEl.view && !layerRef.current) {
-        onViewReady({ target: mapEl });
+      if (mapEl.view && !addedRef.current) {
+        initGraphics(mapEl);
       }
     };
 
@@ -379,36 +294,44 @@ export default function ProjectsMapView({ mode }) {
     return () => {
       mapEl.removeEventListener('arcgisViewReadyChange', handleReady);
     };
-  }, [onViewReady]);
+  }, [initGraphics]);
 
-  // Type filter from the Calcite control.
+  // Type filter
   useEffect(() => {
-    if (!layerRef.current) return;
-    layerRef.current.definitionExpression = filter === 'all' ? null : `type = '${filter}'`;
+    const graphics = graphicsRef.current;
+    if (!graphics || graphics.length === 0) return;
+    graphics.forEach((g) => {
+      g.visible = filter === 'all' || g.attributes.type === filter;
+    });
   }, [filter, ready]);
+
+  // Language update
+  useEffect(() => {
+    const graphics = graphicsRef.current;
+    if (!graphics || graphics.length === 0) return;
+    graphics.forEach((g) => {
+      if (g.attributes && !g.attributes.isLabel) {
+        const p = projects.find((item) => item.id === g.attributes.pid);
+        if (p) {
+          g.attributes.title = lang === 'ar' && p.titleAr ? p.titleAr : p.title;
+          g.attributes.summary = lang === 'ar' && p.summaryAr ? p.summaryAr : p.summary;
+          g.attributes.place = lang === 'ar' && p.location.labelAr ? p.location.labelAr : p.location.label;
+        }
+      }
+    });
+  }, [lang, projects]);
 
   // "Show on map" from a project card: fly there and open its popup.
   useEffect(() => {
-    const view = mapRef.current?.view;
-    const layer = layerRef.current;
-    if (!ready || !view || !layer || focus.projectId == null) return;
+    const view = viewRef.current;
+    const graphics = graphicsRef.current;
+    if (!ready || !view || !graphics || focus.projectId == null) return;
 
-    let cancelled = false;
-    (async () => {
-      const { features } = await layer.queryFeatures({
-        where: `pid = ${Number(focus.projectId)}`,
-        returnGeometry: true,
-        outFields: ['*'],
-      });
-      const feature = features[0];
-      if (cancelled || !feature) return;
-      await view.goTo({ target: feature.geometry, zoom: FOCUS_ZOOM }, { duration: 1400 }).catch(() => {});
-      if (!cancelled) view.openPopup({ features: [feature], location: feature.geometry });
-    })();
+    const pin = graphics.find((g) => g.attributes?.pid === Number(focus.projectId) && !g.attributes?.isLabel);
+    if (!pin) return;
 
-    return () => {
-      cancelled = true;
-    };
+    view.goTo({ target: pin.geometry, zoom: FOCUS_ZOOM }, { duration: 1400 }).catch(() => {});
+    view.openPopup({ features: [pin], location: pin.geometry });
   }, [focus.nonce, focus.projectId, ready]);
 
   return (
@@ -510,7 +433,6 @@ export default function ProjectsMapView({ mode }) {
         <MapLegend />
       </arcgis-map>
 
-      {/* A small status pill, not a dimming veil: it must never fade a popup or the map. */}
       <Box
         role="status"
         aria-hidden={settled}

@@ -7,7 +7,7 @@ export const NAV_LINKS = [
   { id: 'skills', label: 'Skills' },
   { id: 'experience', label: 'Experience' },
   { id: 'projects', label: 'Projects' },
-  { id: 'projects-map', label: 'Map' },
+  { id: 'projects-map', label: 'GIS Lab' },
   { id: 'github', label: 'GitHub' },
   ...(SHOW_VIDEOS ? [{ id: 'videos', label: 'Videos' }] : []),
   { id: 'contact', label: 'Contact' },

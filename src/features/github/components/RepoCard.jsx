@@ -114,43 +114,89 @@ export default function RepoCard({ repo }) {
         </Box>
       )}
 
-      <Box sx={{ mt: 'auto', pt: 3, display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-        <Button
-          href={repo.htmlUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          variant="outlined"
-          startIcon={<GitHubIcon />}
-          aria-label={`View ${repo.name} on GitHub`}
-        >
-          {t('github.viewRepo', 'View repo')}
-        </Button>
-
-        {project && !isBackend && (
+      <Box
+        sx={{
+          mt: 'auto',
+          pt: 2.5,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 1,
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
           <Button
-            component={RouterLink}
-            to={getProjectPath(project)}
-            variant="text"
-            endIcon={
-              <ArrowForwardRoundedIcon
-                sx={{ transform: isRTL ? 'rotate(180deg)' : 'none' }}
-              />
-            }
+            href={repo.htmlUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="outlined"
+            size="small"
+            startIcon={<GitHubIcon sx={{ fontSize: '1.05rem !important' }} />}
+            aria-label={`View ${repo.name} on GitHub`}
+            sx={{
+              whiteSpace: 'nowrap',
+              px: 1.5,
+              py: 0.5,
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              borderRadius: '8px',
+            }}
           >
-            {t('github.caseStudy', 'Case study')}
+            {t('github.viewRepo', 'View repo')}
           </Button>
-        )}
+
+          {project && !isBackend && (
+            <Button
+              component={RouterLink}
+              to={getProjectPath(project)}
+              variant="text"
+              size="small"
+              sx={{
+                whiteSpace: 'nowrap',
+                px: 1.25,
+                py: 0.5,
+                fontSize: '0.8rem',
+                fontWeight: 600,
+              }}
+              endIcon={
+                <ArrowForwardRoundedIcon
+                  sx={{
+                    fontSize: '1rem !important',
+                    transform: isRTL ? 'rotate(180deg)' : 'none',
+                  }}
+                />
+              }
+            >
+              {t('github.caseStudy', 'Case study')}
+            </Button>
+          )}
+        </Box>
 
         {demo && (
-          <Tooltip title="Live demo">
+          <Tooltip title={lang === 'ar' ? 'معاينة حية' : 'Live demo'}>
             <IconButton
               href={demo}
               target="_blank"
               rel="noopener noreferrer"
+              size="small"
               aria-label={`Live demo — ${title}`}
-              sx={{ ml: 'auto', color: 'text.secondary', '&:hover': { color: 'text.primary' } }}
+              sx={{
+                flexShrink: 0,
+                alignSelf: 'center',
+                color: 'text.secondary',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: '8px',
+                p: 0.6,
+                transition: 'all .2s ease',
+                '&:hover': {
+                  color: 'primary.main',
+                  borderColor: 'primary.main',
+                  backgroundColor: 'action.hover',
+                },
+              }}
             >
-              <LaunchRoundedIcon fontSize="small" />
+              <LaunchRoundedIcon sx={{ fontSize: 16 }} />
             </IconButton>
           </Tooltip>
         )}

@@ -3,12 +3,133 @@ import Typography from '@mui/material/Typography';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { PROFILE } from '@/data/profile.js';
 import { Section, Reveal, Card, IconTile, SocialLinks } from '@/shared/components/ui';
 import ContactForm from './ContactForm.jsx';
 import ContactMapCard from './ContactMapCard.jsx';
 import { useLanguage } from '@/i18n';
+
+function WhatsAppRow({ phone, phoneIntl }) {
+  const { lang, isRTL } = useLanguage();
+  const cleanPhone = (phoneIntl ?? phone).replace(/\D/g, '');
+  const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+    lang === 'ar'
+      ? 'مرحباً أحمد، اطلعت على معرض أعمالك وأود مناقشة مشروع معك.'
+      : 'Hello Ahmed, I saw your portfolio and would like to discuss a project.'
+  )}`;
+
+  return (
+    <Box
+      component="a"
+      href={waUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 1.5,
+        p: 1.5,
+        borderRadius: '12px',
+        textDecoration: 'none',
+        backgroundColor: (theme) =>
+          theme.palette.mode === 'dark' ? 'rgba(37, 211, 102, 0.08)' : 'rgba(37, 211, 102, 0.06)',
+        border: '1px solid',
+        borderColor: (theme) =>
+          theme.palette.mode === 'dark' ? 'rgba(37, 211, 102, 0.28)' : 'rgba(37, 211, 102, 0.32)',
+        transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          backgroundColor: (theme) =>
+            theme.palette.mode === 'dark' ? 'rgba(37, 211, 102, 0.16)' : 'rgba(37, 211, 102, 0.12)',
+          borderColor: '#25D366',
+          transform: 'translateY(-2px)',
+          boxShadow: '0 6px 18px rgba(37, 211, 102, 0.18)',
+          '& .wa-btn': {
+            backgroundColor: '#25D366',
+            color: '#ffffff',
+          },
+          '& .wa-arrow': {
+            transform: isRTL ? 'translateX(-3px) rotate(180deg)' : 'translateX(3px)',
+          },
+        },
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            flexShrink: 0,
+            borderRadius: '12px',
+            display: 'grid',
+            placeItems: 'center',
+            backgroundColor: 'rgba(37, 211, 102, 0.16)',
+            color: '#25D366',
+          }}
+        >
+          <WhatsAppIcon sx={{ fontSize: 24 }} />
+        </Box>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontWeight: 700,
+              color: 'text.primary',
+              lineHeight: 1.25,
+              fontSize: '0.88rem',
+            }}
+          >
+            {lang === 'ar' ? 'محادثة عبر واتساب' : 'Chat on WhatsApp'}
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+              display: 'block',
+              mt: 0.25,
+              fontWeight: 500,
+              overflowWrap: 'anywhere',
+            }}
+          >
+            {lang === 'ar' ? 'مراسلة مباشرة' : 'Direct messaging'} · {phone}
+          </Typography>
+        </Box>
+      </Box>
+
+      <Box
+        className="wa-btn"
+        sx={{
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 0.5,
+          px: 1.5,
+          py: 0.6,
+          borderRadius: 999,
+          backgroundColor: 'rgba(37, 211, 102, 0.14)',
+          color: '#25D366',
+          fontWeight: 700,
+          fontSize: '0.78rem',
+          letterSpacing: '0.01em',
+          transition: 'all 0.25s ease',
+        }}
+      >
+        <span>{lang === 'ar' ? 'محادثة فورية' : 'Open Chat'}</span>
+        <ArrowForwardRoundedIcon
+          className="wa-arrow"
+          sx={{
+            fontSize: '1rem',
+            transform: isRTL ? 'rotate(180deg)' : 'none',
+            transition: 'transform 0.25s ease',
+          }}
+        />
+      </Box>
+    </Box>
+  );
+}
 
 function ContactRow({ icon, label, value, href, iconSx }) {
   if (!value) return null;
@@ -57,12 +178,6 @@ function ContactRow({ icon, label, value, href, iconSx }) {
 export default function Contact() {
   const { email, phone, phoneIntl } = PROFILE.contact;
   const { t, lang } = useLanguage();
-  const cleanPhone = (phoneIntl ?? phone).replace(/\D/g, '');
-  const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-    lang === 'ar'
-      ? 'مرحباً أحمد، اطلعت على معرض أعمالك وأود مناقشة مشروع معك.'
-      : 'Hello Ahmed, I saw your portfolio and would like to discuss a project.'
-  )}`;
 
   return (
     <Section
@@ -99,13 +214,7 @@ export default function Contact() {
                   value={phone}
                   href={`tel:${phoneIntl ?? phone}`}
                 />
-                <ContactRow
-                  icon={WhatsAppIcon}
-                  label={lang === 'ar' ? 'واتساب' : 'WhatsApp'}
-                  value={phone}
-                  href={waUrl}
-                  iconSx={{ color: '#25D366' }}
-                />
+                <WhatsAppRow phone={phone} phoneIntl={phoneIntl} />
                 <ContactRow
                   icon={PlaceOutlinedIcon}
                   label={lang === 'ar' ? 'الموقع' : 'Based in'}
