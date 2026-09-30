@@ -61,8 +61,8 @@ export const RADIUS = {
 };
 
 export const LAYOUT = {
-  containerMax: 1560,
-  navHeight: 64,
+  containerMax: 1200,
+  navHeight: 58,
 };
 
 export const SHADOWS = {

@@ -80,13 +80,13 @@ export default function Navbar() {
       >
         <Box
           sx={{
-            height: { xs: 56, md: 62 },
+            height: { xs: 52, md: 58 },
             display: 'flex',
             alignItems: 'center',
-            gap: 2,
-            pl: { xs: 1.75, md: 2.25 },
-            pr: { xs: 1, md: 1.5 },
-            borderRadius: { xs: '14px', md: '18px' },
+            gap: 1.5,
+            pl: { xs: 1.5, md: 2 },
+            pr: { xs: 1, md: 1.25 },
+            borderRadius: { xs: '12px', md: '16px' },
             border: '1px solid',
             borderColor: 'divider',
             backgroundColor:
@@ -94,7 +94,7 @@ export default function Navbar() {
             backdropFilter: 'saturate(180%) blur(16px)',
             WebkitBackdropFilter: 'saturate(180%) blur(16px)',
             boxShadow: scrolled
-              ? '0 12px 32px rgba(15, 23, 42, 0.10)'
+              ? '0 10px 28px rgba(15, 23, 42, 0.08)'
               : '0 2px 8px rgba(15, 23, 42, 0.04)',
             transition: 'box-shadow .3s ease',
           }}
@@ -117,7 +117,7 @@ export default function Navbar() {
               ml: isRTL ? 0 : 'auto',
               mr: isRTL ? 'auto' : 0,
               display: { xs: 'none', lg: 'flex' },
-              gap: 0.5,
+              gap: 0.25,
             }}
           >
             {NAV_LINKS.map((link) => {
@@ -133,12 +133,12 @@ export default function Navbar() {
                     background: 'none',
                     border: 0,
                     cursor: 'pointer',
-                    px: 1.75,
-                    py: 1,
-                    borderRadius: '10px',
+                    px: 1.35,
+                    py: 0.75,
+                    borderRadius: '8px',
                     font: 'inherit',
                     fontWeight: 500,
-                    fontSize: 15,
+                    fontSize: 14,
                     color: active ? 'primary.main' : 'text.secondary',
                     backgroundColor: active
                       ? 'var(--mui-palette-surfaces-primarySoft)'
@@ -164,7 +164,7 @@ export default function Navbar() {
               mr: isRTL ? { xs: 'auto', lg: 1 } : 0,
               display: 'flex',
               alignItems: 'center',
-              gap: 1,
+              gap: 0.75,
             }}
           >
             <LanguageToggle />
@@ -174,7 +174,13 @@ export default function Navbar() {
               variant="contained"
               href={PROFILE.links.cv}
               download
-              sx={{ display: { xs: 'none', sm: 'inline-flex' }, borderRadius: '12px' }}
+              sx={{
+                display: { xs: 'none', sm: 'inline-flex' },
+                borderRadius: '10px',
+                fontSize: 13.5,
+                px: 1.75,
+                py: 0.65,
+              }}
             >
               {t('nav.downloadCV', 'Download CV')}
             </Button>

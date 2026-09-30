@@ -11,6 +11,8 @@ import { Reveal, SocialLinks } from '@/shared/components/ui';
 import usePrefersReducedMotion from '@/hooks/usePrefersReducedMotion.js';
 import { INTRO, INTRO_AR } from '../heroContent.js';
 import PhotoOrbit from './PhotoOrbit.jsx';
+import RotatingLine from './RotatingLine.jsx';
+import ContourLines from './ContourLines.jsx';
 import { useLanguage } from '@/i18n';
 
 export default function Hero() {
@@ -58,6 +60,9 @@ export default function Hero() {
         pb: { xs: 3, sm: 4, md: 4 },
       }}
     >
+      {/* Topographic GIS contour lines background */}
+      <ContourLines />
+
       {glowEnabled && (
         <Box
           ref={glowRef}
@@ -118,13 +123,15 @@ export default function Hero() {
               {lang === 'ar' ? 'أهلاً بك، أنا' : "Hello, I'm"}
             </Typography>
 
-            <Typography variant="h1" component="h1" sx={{ mb: { xs: 1.5, md: 2 } }}>
+            <Typography variant="h1" component="h1" sx={{ mb: { xs: 1, md: 1.5 } }}>
               {lang === 'ar' ? PROFILE.nameAr : PROFILE.shortName}
             </Typography>
 
+            <RotatingLine />
+
             <Typography
               variant="body1"
-              sx={{ color: 'text.secondary', maxWidth: 600, mt: 0, lineHeight: 1.65 }}
+              sx={{ color: 'text.secondary', maxWidth: 600, mt: { xs: 1.5, md: 2 }, lineHeight: 1.65 }}
             >
               {lang === 'ar' ? INTRO_AR : INTRO}
             </Typography>

@@ -6,6 +6,7 @@ export const PROFILE = {
   name: 'Ahmed Salah Muhammed',
   nameAr: 'أحمد صلاح محمد',
   shortName: 'Ahmed Salah',
+  shortNameAr: 'أحمد صلاح',
   title: 'Full-Stack Developer · GIS Developer',
   badge: 'AWS Certified Cloud Practitioner',
   background: 'Urban & Environmental Planner',
