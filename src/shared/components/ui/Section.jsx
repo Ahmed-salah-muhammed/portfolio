@@ -20,7 +20,7 @@ export default function Section({ id, title, subtitle, alt = false, children, sx
       aria-labelledby={title ? `${id}-title` : undefined}
       sx={{
         position: 'relative',
-        py: { xs: 9, sm: 11, md: 14, xl: 16 },
+        py: { xs: 6, sm: 8, md: 9, xl: 11 },
         backgroundColor: alt ? 'var(--mui-palette-surfaces-alt)' : 'background.default',
         // Lets children (e.g. timeline nodes) cut a ring out of whatever background they sit on.
         '--section-bg': alt

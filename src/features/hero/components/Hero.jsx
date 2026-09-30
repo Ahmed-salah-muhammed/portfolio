@@ -10,7 +10,6 @@ import { LAYOUT } from '@/theme/tokens.js';
 import { Reveal, SocialLinks } from '@/shared/components/ui';
 import usePrefersReducedMotion from '@/hooks/usePrefersReducedMotion.js';
 import { INTRO, INTRO_AR } from '../heroContent.js';
-import RotatingLine from './RotatingLine.jsx';
 import PhotoOrbit from './PhotoOrbit.jsx';
 import { useLanguage } from '@/i18n';
 
@@ -53,9 +52,10 @@ export default function Hero() {
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
-        minHeight: { lg: `min(calc(100vh - ${LAYOUT.navHeight}px), 980px)` },
-        pt: { xs: 5, sm: 7, md: 8 },
-        pb: { xs: 9, md: 12 },
+        minHeight: { md: 'auto', lg: 'calc(100vh - 120px)' },
+        maxHeight: { xl: 740 },
+        pt: { xs: 2.5, sm: 3, md: 3.5 },
+        pb: { xs: 3, sm: 4, md: 4 },
       }}
     >
       {glowEnabled && (
@@ -77,10 +77,12 @@ export default function Hero() {
       <Container sx={{ position: 'relative' }}>
         <Box
           sx={{
+            maxWidth: { md: 1040, lg: 1120, xl: 1180 },
+            mx: 'auto',
             display: 'grid',
             alignItems: 'center',
-            gap: { xs: 7, md: 6, lg: 10 },
-            gridTemplateColumns: { xs: '1fr', md: '1.1fr 0.9fr' },
+            gap: { xs: 3, md: 3.5, lg: 4 },
+            gridTemplateColumns: { xs: '1fr', md: '1.08fr 0.92fr' },
           }}
         >
           <Reveal sx={{ order: { xs: 2, md: 1 } }}>
@@ -90,9 +92,9 @@ export default function Hero() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: 1,
-                  px: 1.75,
-                  py: 0.75,
-                  mb: { xs: 2.5, md: 3.5 },
+                  px: 1.5,
+                  py: 0.5,
+                  mb: { xs: 1.5, md: 2 },
                   borderRadius: 999,
                   border: '1px solid',
                   borderColor: 'divider',
@@ -111,20 +113,18 @@ export default function Hero() {
             <Typography
               variant="subtitle1"
               component="p"
-              sx={{ color: 'text.secondary', fontWeight: 500, mb: 1 }}
+              sx={{ color: 'text.secondary', fontWeight: 500, mb: 0.5 }}
             >
               {lang === 'ar' ? 'أهلاً بك، أنا' : "Hello, I'm"}
             </Typography>
 
-            <Typography variant="h1" component="h1" sx={{ mb: { xs: 2, md: 2.5 } }}>
+            <Typography variant="h1" component="h1" sx={{ mb: { xs: 1.5, md: 2 } }}>
               {lang === 'ar' ? PROFILE.nameAr : PROFILE.shortName}
             </Typography>
 
-            <RotatingLine />
-
             <Typography
               variant="body1"
-              sx={{ color: 'text.secondary', maxWidth: 640, mt: { xs: 2, md: 3 } }}
+              sx={{ color: 'text.secondary', maxWidth: 600, mt: 0, lineHeight: 1.65 }}
             >
               {lang === 'ar' ? INTRO_AR : INTRO}
             </Typography>
@@ -134,7 +134,7 @@ export default function Hero() {
                 display: 'flex',
                 gap: 2,
                 flexWrap: 'wrap',
-                mt: { xs: 4, md: 5 },
+                mt: { xs: 2.5, md: 3 },
                 '& .MuiButton-root': { flex: { xs: '1 1 auto', sm: '0 0 auto' } },
               }}
             >
@@ -155,7 +155,7 @@ export default function Hero() {
               </Button>
             </Box>
 
-            <Box sx={{ mt: { xs: 3, md: 4 }, [isRTL ? 'mr' : 'ml']: -1 }}>
+            <Box sx={{ mt: { xs: 2, md: 2.5 }, [isRTL ? 'mr' : 'ml']: -1 }}>
               <SocialLinks />
             </Box>
           </Reveal>

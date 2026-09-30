@@ -241,97 +241,124 @@ export default function ProjectsMapView({ mode }) {
 
   const onViewReady = useCallback(
     (event) => {
-      const mapEl = event.target;
-      if (!mapEl.view || layerRef.current) return;
+      const mapEl = event?.target ?? event;
+      if (!mapEl || !mapEl.view || layerRef.current) return;
 
       friendlyNavigation(mapEl.view);
 
-      const layer = new FeatureLayer({
-        title: 'Projects',
-        source: projects.map((p, i) => toGraphic(p, i, lang)),
-        fields: FIELDS,
-        objectIdField: 'oid',
-        geometryType: 'point',
-        spatialReference: { wkid: 4326 },
-        outFields: ['*'],
-        featureReduction: {
-          ...CLUSTERING,
-          // Upgraded to brand primary indigo with crisp luminous outline and halo
-          symbol: {
-            type: 'simple-marker',
-            style: 'circle',
-            color: [70, 72, 212, 0.92],
-            outline: { color: [255, 255, 255, 0.95], width: 2.5 },
-          },
-        },
-        renderer: {
-          type: 'unique-value',
-          field: 'type',
-          legendOptions: { title: 'Project type' },
-          uniqueValueInfos: PROJECT_TYPES.map((t) => ({
-            value: t.key,
-            label: t.label,
+      try {
+        const layer = new FeatureLayer({
+          title: 'Projects',
+          source: projects.map((p, i) => toGraphic(p, i, lang)),
+          fields: FIELDS,
+          objectIdField: 'oid',
+          geometryType: 'point',
+          spatialReference: { wkid: 4326 },
+          outFields: ['*'],
+          featureReduction: {
+            ...CLUSTERING,
+            // Upgraded to brand primary indigo with crisp luminous outline and halo
             symbol: {
               type: 'simple-marker',
               style: 'circle',
-              size: 16,
-              color: PROJECT_TYPE_COLORS[t.key],
-              outline: { color: '#ffffff', width: 2 },
-            },
-          })),
-        },
-        labelingInfo: [
-          {
-            labelExpressionInfo: { expression: '$feature.num' },
-            labelPlacement: 'above-center',
-            symbol: {
-              type: 'text',
-              color: '#0f172a',
-              haloColor: '#ffffff',
-              haloSize: 1.5,
-              // Must be a family Esri's font service hosts — 'Arial' bold hangs the layer view.
-              font: { size: 10, weight: 'bold', family: 'Noto Sans' },
+              color: [70, 72, 212, 0.92],
+              outline: { color: [255, 255, 255, 0.95], width: 2.5 },
             },
           },
-        ],
-        popupTemplate: {
-          title: '{num} · {title}',
-          outFields: ['*'],
-          content: ({ graphic }) => buildPopup(graphic.attributes, navigate, lang),
-        },
-      });
+          renderer: {
+            type: 'unique-value',
+            field: 'type',
+            legendOptions: { title: 'Project type' },
+            uniqueValueInfos: PROJECT_TYPES.map((t) => ({
+              value: t.key,
+              label: t.label,
+              symbol: {
+                type: 'simple-marker',
+                style: 'circle',
+                size: 16,
+                color: PROJECT_TYPE_COLORS[t.key],
+                outline: { color: '#ffffff', width: 2 },
+              },
+            })),
+          },
+          labelingInfo: [
+            {
+              labelExpressionInfo: { expression: '$feature.num' },
+              labelPlacement: 'above-center',
+              symbol: {
+                type: 'text',
+                color: '#0f172a',
+                haloColor: '#ffffff',
+                haloSize: 1.5,
+                // Must be a family Esri's font service hosts — 'Arial' bold hangs the layer view.
+                font: { size: 10, weight: 'bold', family: 'Noto Sans' },
+              },
+            },
+          ],
+          popupTemplate: {
+            title: '{num} · {title}',
+            outFields: ['*'],
+            content: ({ graphic }) => buildPopup(graphic.attributes, navigate, lang),
+          },
+        });
 
-      mapEl.map.add(layer);
-      layerRef.current = layer;
-      setReady(true);
+        mapEl.map.add(layer);
+        layerRef.current = layer;
+        setReady(true);
 
-      // Smoothly zoom in when clicking on a cluster
-      mapEl.view.on('click', async (event) => {
-        try {
-          const response = await mapEl.view.hitTest(event);
-          const clusterHit = response?.results?.find((r) => r.graphic?.isAggregate);
-          if (clusterHit?.graphic?.geometry) {
-            mapEl.view
-              .goTo({ target: clusterHit.graphic.geometry, zoom: mapEl.view.zoom + 2 }, { duration: 600 })
-              .catch(() => {});
+        // Smoothly zoom in when clicking on a cluster
+        mapEl.view.on('click', async (evt) => {
+          try {
+            const response = await mapEl.view.hitTest(evt);
+            const clusterHit = response?.results?.find((r) => r.graphic?.isAggregate);
+            if (clusterHit?.graphic?.geometry) {
+              mapEl.view
+                .goTo({ target: clusterHit.graphic.geometry, zoom: mapEl.view.zoom + 2 }, { duration: 600 })
+                .catch(() => {});
+            }
+          } catch {
+            // ignore
           }
-        } catch {
-          // ignore
-        }
-      });
+        });
 
-      // Hide the loading veil once the points are actually on screen, with a fallback
-      // so a slow font/tile request can never leave it up forever.
-      const fallback = setTimeout(() => setSettled(true), 8000);
-      mapEl.view
-        .whenLayerView(layer)
-        .then((lv) => reactiveUtils.whenOnce(() => !lv.updating))
-        .then(() => setSettled(true))
-        .catch(() => setSettled(true))
-        .finally(() => clearTimeout(fallback));
+        // Hide the loading veil once the points are actually on screen, with a fallback
+        // so a slow font/tile request can never leave it up forever.
+        const fallback = setTimeout(() => setSettled(true), 6000);
+        mapEl.view
+          .whenLayerView(layer)
+          .then((lv) => reactiveUtils.whenOnce(() => !lv.updating))
+          .then(() => setSettled(true))
+          .catch(() => setSettled(true))
+          .finally(() => clearTimeout(fallback));
+      } catch (err) {
+        console.warn('Error initializing projects feature layer:', err);
+        setSettled(true);
+        setReady(true);
+      }
     },
     [projects, navigate, lang],
   );
+
+  // Native event listener & immediate check for Safari iOS compatibility
+  useEffect(() => {
+    const mapEl = mapRef.current;
+    if (!mapEl) return undefined;
+
+    const handleReady = () => {
+      if (mapEl.view && !layerRef.current) {
+        onViewReady({ target: mapEl });
+      }
+    };
+
+    if (mapEl.ready || mapEl.view) {
+      handleReady();
+    }
+
+    mapEl.addEventListener('arcgisViewReadyChange', handleReady);
+    return () => {
+      mapEl.removeEventListener('arcgisViewReadyChange', handleReady);
+    };
+  }, [onViewReady]);
 
   // Type filter from the Calcite control.
   useEffect(() => {
@@ -371,7 +398,7 @@ export default function ProjectsMapView({ mode }) {
         center={CENTER}
         zoom={5}
         onarcgisViewReadyChange={onViewReady}
-        style={{ width: '100%', height: '100%' }}
+        style={{ width: '100%', height: '100%', display: 'block' }}
       >
       <arcgis-zoom slot="top-left" />
       <arcgis-home slot="top-left" />
@@ -379,7 +406,7 @@ export default function ProjectsMapView({ mode }) {
       <arcgis-expand slot="top-left" expand-tooltip="Basemap gallery">
         <arcgis-basemap-gallery source={BASEMAP_GALLERY} />
       </arcgis-expand>
-      <div slot="top-right">
+      <div slot="top-right" style={{ maxWidth: 'min(420px, calc(100vw - 80px))', overflowX: 'auto' }}>
         <calcite-segmented-control
           scale="s"
           oncalciteSegmentedControlChange={(e) => setFilter(e.target.value)}

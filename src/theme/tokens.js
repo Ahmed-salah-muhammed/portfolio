@@ -60,11 +60,9 @@ export const RADIUS = {
   pill: 9999,
 };
 
-// The page uses most of a wide screen: content grows to 1600px (incl. side padding),
-// so a 1920px monitor keeps modest margins instead of a narrow centred column.
 export const LAYOUT = {
-  containerMax: 1600,
-  navHeight: 80,
+  containerMax: 1560,
+  navHeight: 64,
 };
 
 export const SHADOWS = {

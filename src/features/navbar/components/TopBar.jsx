@@ -9,11 +9,11 @@ import { useLanguage } from '@/i18n';
 const itemSx = {
   display: 'inline-flex',
   alignItems: 'center',
-  gap: 1,
+  gap: 0.75,
   whiteSpace: 'nowrap',
   color: 'inherit',
   textDecoration: 'none',
-  fontSize: 14,
+  fontSize: 13,
   fontWeight: 500,
   '&:hover': { opacity: 0.85 },
 };
@@ -25,23 +25,23 @@ function ContactItems({ hidden = false }) {
   return (
     <Box
       aria-hidden={hidden || undefined}
-      sx={{ display: 'inline-flex', alignItems: 'center', gap: { xs: 4, md: 6 }, pr: { xs: 4, md: 6 } }}
+      sx={{ display: 'inline-flex', alignItems: 'center', gap: { xs: 3, md: 5 }, pr: { xs: 3, md: 5 } }}
     >
       {offer && (
         <Box component="span" sx={{ ...itemSx, fontWeight: 700 }}>
-          <CardGiftcardRoundedIcon sx={{ fontSize: 18 }} />
+          <CardGiftcardRoundedIcon sx={{ fontSize: 16 }} />
           {t('topbar.offer', offer)}
         </Box>
       )}
       {email && (
         <Box component="a" href={`mailto:${email}`} tabIndex={hidden ? -1 : 0} sx={itemSx}>
-          <EmailOutlinedIcon sx={{ fontSize: 18 }} />
+          <EmailOutlinedIcon sx={{ fontSize: 16 }} />
           {email}
         </Box>
       )}
       {phone && (
         <Box component="a" href={`tel:${phoneIntl ?? phone}`} tabIndex={hidden ? -1 : 0} sx={itemSx}>
-          <PhoneOutlinedIcon sx={{ fontSize: 18 }} />
+          <PhoneOutlinedIcon sx={{ fontSize: 16 }} />
           {phone}
         </Box>
       )}
@@ -61,7 +61,7 @@ export default function TopBar() {
       role="region"
       aria-label="Quick contact"
       sx={{
-        height: 40,
+        height: { xs: 30, md: 34 },
         overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',

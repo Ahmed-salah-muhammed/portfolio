@@ -39,21 +39,21 @@ export function useNearViewport(margin = '400px', { preloadAfter } = {}) {
     if (near || preloadAfter == null || shouldSkipPreload()) return undefined;
 
     let timer;
-    let idle;
     const mount = () => setNear(true);
     const schedule = () => {
-      timer = setTimeout(() => {
-        if ('requestIdleCallback' in window) idle = requestIdleCallback(mount, { timeout: 3000 });
-        else mount();
-      }, preloadAfter);
+      timer = setTimeout(mount, preloadAfter);
     };
 
-    if (document.readyState === 'complete') schedule();
-    else window.addEventListener('load', schedule, { once: true });
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      schedule();
+    } else {
+      window.addEventListener('DOMContentLoaded', schedule, { once: true });
+      window.addEventListener('load', schedule, { once: true });
+    }
 
     return () => {
       clearTimeout(timer);
-      if (idle !== undefined) cancelIdleCallback(idle);
+      window.removeEventListener('DOMContentLoaded', schedule);
       window.removeEventListener('load', schedule);
     };
   }, [near, preloadAfter]);

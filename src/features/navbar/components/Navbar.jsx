@@ -22,7 +22,7 @@ import { useLanguage } from '@/i18n';
 
 // Gap between the floating header and the viewport edges.
 // Strings, not numbers: in `sx`, a bare number on `mt` is a spacing multiple (×8px).
-const FLOAT_GAP = { xs: '8px', md: '12px' };
+const FLOAT_GAP = { xs: '6px', md: '8px' };
 
 /**
  * Floating header: detached from the page edges with a margin on every side, fully
@@ -80,13 +80,13 @@ export default function Navbar() {
       >
         <Box
           sx={{
-            height: { xs: 64, md: 72 },
+            height: { xs: 56, md: 62 },
             display: 'flex',
             alignItems: 'center',
             gap: 2,
-            pl: { xs: 2, md: 2.5 },
+            pl: { xs: 1.75, md: 2.25 },
             pr: { xs: 1, md: 1.5 },
-            borderRadius: { xs: '16px', md: '20px' },
+            borderRadius: { xs: '14px', md: '18px' },
             border: '1px solid',
             borderColor: 'divider',
             backgroundColor:

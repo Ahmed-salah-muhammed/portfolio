@@ -46,3 +46,14 @@ video {
 .skip-link:focus {
   left: 0;
 }
+
+/* ArcGIS Map Web Components display and mobile touch support */
+arcgis-map {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 240px;
+  position: relative;
+  touch-action: pan-y pinch-zoom;
+}
+

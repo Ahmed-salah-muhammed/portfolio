@@ -40,10 +40,10 @@ export const components = {
       // Side padding steps up with the screen: phone 20 → tablet 32 → laptop 48 → desktop 64.
       root: ({ theme }) => ({
         maxWidth: LAYOUT.containerMax,
-        paddingInline: 20,
-        [theme.breakpoints.up('sm')]: { paddingInline: 32 },
-        [theme.breakpoints.up('md')]: { paddingInline: 48 },
-        [theme.breakpoints.up('lg')]: { paddingInline: 64 },
+        paddingInline: 18,
+        [theme.breakpoints.up('sm')]: { paddingInline: 24 },
+        [theme.breakpoints.up('md')]: { paddingInline: 32 },
+        [theme.breakpoints.up('lg')]: { paddingInline: 36 },
       }),
     },
   },
@@ -52,12 +52,13 @@ export const components = {
     styleOverrides: {
       root: {
         borderRadius: RADIUS.base,
-        paddingInline: 22,
-        paddingBlock: 11,
+        paddingInline: 18,
+        paddingBlock: 8.5,
+        fontSize: 14,
         transition: 'background-color .2s, border-color .2s, color .2s, transform .2s',
       },
-      sizeLarge: { paddingInline: 28, paddingBlock: 14, fontSize: 16 },
-      sizeSmall: { paddingInline: 14, paddingBlock: 7, fontSize: 14 },
+      sizeLarge: { paddingInline: 22, paddingBlock: 10, fontSize: 14.5 },
+      sizeSmall: { paddingInline: 12, paddingBlock: 6, fontSize: 13 },
       containedPrimary: {
         '&:hover': { backgroundColor: 'var(--mui-palette-primary-dark)' },
       },

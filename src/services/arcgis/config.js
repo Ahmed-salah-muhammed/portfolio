@@ -14,20 +14,41 @@ export const basemapFor = (mode) => {
   return mode === 'dark' ? 'dark-gray-vector' : 'gray-vector';
 };
 
-/**
- * Maps sit inside a page people scroll, so they must not steal that scrolling:
- *  - touch: one finger scrolls the page, two fingers pan/zoom the map;
- *  - mouse: the wheel zooms only after the map has been clicked, and stops again as
- *    soon as the pointer leaves it.
- */
 export const friendlyNavigation = (view) => {
-  view.navigation.browserTouchPanEnabled = true;
-  view.navigation.mouseWheelZoomEnabled = false;
-
-  view.on('click', () => {
-    view.navigation.mouseWheelZoomEnabled = true;
-  });
-  view.container?.addEventListener('mouseleave', () => {
-    view.navigation.mouseWheelZoomEnabled = false;
-  });
+  if (!view) return;
+  try {
+    const nav = view.navigation;
+    if (nav) {
+      // In @arcgis/core, setting browserTouchPanEnabled to false allows single-finger touch
+      // to scroll the page naturally on mobile (especially iOS Safari), while two fingers
+      // can still pinch-to-zoom and pan the map.
+      if ('browserTouchPanEnabled' in nav) {
+        nav.browserTouchPanEnabled = false;
+      }
+      if (nav.actionMap) {
+        nav.actionMap.mouseWheel = 'none';
+        view.on('click', () => {
+          try {
+            if (view.navigation?.actionMap) {
+              view.navigation.actionMap.mouseWheel = 'zoom';
+            }
+          } catch {
+            // ignore
+          }
+        });
+        view.container?.addEventListener('mouseleave', () => {
+          try {
+            if (view.navigation?.actionMap) {
+              view.navigation.actionMap.mouseWheel = 'none';
+            }
+          } catch {
+            // ignore
+          }
+        });
+      }
+    }
+  } catch (err) {
+    console.warn('Could not set friendly navigation on map view:', err);
+  }
 };
+

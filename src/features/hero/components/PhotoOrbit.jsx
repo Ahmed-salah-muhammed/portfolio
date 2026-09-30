@@ -46,7 +46,7 @@ export default function PhotoOrbit() {
       sx={{
         position: 'relative',
         width: '100%',
-        maxWidth: { xs: 380, sm: 460, md: 520, lg: 600, xl: 680 },
+        maxWidth: { xs: 300, sm: 350, md: 390, lg: 430, xl: 460 },
         aspectRatio: '1 / 1',
         mx: 'auto',
       }}

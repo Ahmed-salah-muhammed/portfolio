@@ -34,7 +34,7 @@ function Placeholder({ children }) {
 export default function ContactMapCard() {
   const { mode, systemMode } = useColorScheme();
   const resolved = (mode === 'system' ? systemMode : mode) ?? 'light';
-  const [ref, near] = useNearViewport('400px', { preloadAfter: 3500 });
+  const [ref, near] = useNearViewport('400px', { preloadAfter: 1200 });
 
   return (
     <Box
@@ -42,8 +42,8 @@ export default function ContactMapCard() {
       className={resolved === 'dark' ? 'calcite-mode-dark' : 'calcite-mode-light'}
       sx={{
         position: 'relative',
-        // A floor, not a fixed height: beside the form (lg+) the map grows to fill its column.
         flex: 1,
+        height: { xs: 250, sm: 270, md: 300, lg: '100%' },
         minHeight: { xs: 240, md: 280 },
         borderRadius: (t) => `${t.tokens.RADIUS.lg}px`,
         overflow: 'hidden',

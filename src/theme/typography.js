@@ -10,12 +10,12 @@ const fluid = (minPx, maxPx, minVw = 360, maxVw = 1920) => {
 };
 
 export const FLUID = {
-  hero: fluid(40, 80),
-  h2: fluid(30, 52),
-  h3: fluid(19, 24),
-  h4: fluid(17, 20),
-  body1: fluid(16, 19),
-  body2: fluid(15, 16.5),
+  hero: fluid(32, 50),
+  h2: fluid(24, 38),
+  h3: fluid(18, 22),
+  h4: fluid(16, 19),
+  body1: fluid(14.5, 16.5),
+  body2: fluid(13.5, 15),
 };
 
 export const typography = {
