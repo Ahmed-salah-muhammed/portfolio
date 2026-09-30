@@ -1,0 +1,48 @@
+/* Global resets that sit below MUI's CssBaseline.
+   NOTE: the Tailwind file at docs/index.css belongs to an unrelated project and is
+   deliberately never imported — this app uses Material UI only. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+picture,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+/* Skip link — visible only when focused. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 2000;
+  padding: 12px 20px;
+  border-radius: 0 0 8px 0;
+  background: var(--mui-palette-primary-main);
+  color: var(--mui-palette-primary-contrastText);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  left: 0;
+}

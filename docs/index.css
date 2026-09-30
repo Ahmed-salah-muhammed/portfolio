@@ -1,0 +1,129 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Default Theme Variables (Light Mode) */
+:root {
+    --prim: #ffffff;
+    --sec: #f8fafc;
+    --thr: #3b82f6;
+    --for: #52525b;
+    --scroll-thumb: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Mode Overrides */
+.dark {
+    --prim: #09090b;
+    --sec: #18181b;
+    --thr: #3b82f6;
+    --for: #a1a1aa;
+    --scroll-thumb: rgba(255, 255, 255, 0.1);
+}
+
+@theme {
+    /* Colors */
+    --color-prim: var(--prim);
+    --color-sec: var(--sec);
+    --color-thr: var(--thr);
+    --color-for: var(--for);
+
+    /* Fonts */
+    --font-sans: "Montserrat";
+    --font-sec: "Noto Kufi Arabic", sans-serif;
+    --font-thr: "Inter", sans-serif;
+    --font-for: "Lateef", sans-serif;
+}
+
+@layer base {
+    body {
+        @apply bg-[--color-prim] text-[--color-for] transition-colors duration-300;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--scroll-thumb);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--for);
+        opacity: 0.3;
+    }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--scroll-thumb) transparent;
+    }
+}
+
+@utility trans {
+    @apply transition-all duration-200;
+}
+
+@utility wrap {
+    @apply flex w-full h-full gap-12;
+}
+
+@utility hide-scrollbar {
+    &::-webkit-scrollbar {
+        display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+@utility h1 {
+    @apply text-4xl font-sans font-bold text-black  dark:text-white mb-4 tracking-tight;
+}
+
+@utility h2 {
+    @apply text-2xl font-sans font-semibold text-[--color-for] dark:text-white mt-10 mb-4 tracking-tight border-b border-[--color-for]/10 pb-2;
+}
+
+@utility txt {
+    @apply text-[16px] font-sec text-[--color-for] leading-7 mb-6;
+}
+
+@utility bold-txt {
+    @apply font-semibold text-[--color-for] dark:text-white;
+}
+
+@utility badge {
+    @apply bg-[--color-thr]/10 text-[--color-thr] px-1.5 py-0.5 rounded-md font-thr text-[13px] font-medium border border-[--color-thr]/20;
+}
+
+@utility box {
+    @apply bg-[--color-sec]/40 border border-[--color-for]/10 rounded-xl mb-4 overflow-hidden trans;
+    &:hover {
+        @apply border-[--color-for]/20;
+    }
+}
+
+@utility box-summary {
+    @apply p-4 font-sans font-medium text-[--color-for] dark:text-white cursor-pointer list-none flex items-center justify-between select-none;
+}
+
+@utility box-content {
+    @apply p-4 pt-0 text-sm text-[--color-for] leading-6;
+}
+
+@keyframes spin-every-5s {
+    0% {
+        transform: rotate(0deg);
+    }
+    10% {
+        transform: rotate(360deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}

@@ -1,0 +1,49 @@
+{
+  "name": "ahmed-salah-portfolio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Portfolio of Ahmed Salah Muhammed Muhammed — GIS Developer & Full-Stack Developer",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.{js,jsx,css}\""
+  },
+  "dependencies": {
+    "@arcgis/core": "^5.1.26",
+    "@arcgis/map-components": "^5.1.26",
+    "@emailjs/browser": "^4.4.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@esri/calcite-components": "^5.1.2",
+    "@hookform/resolvers": "^5.9.1",
+    "@mui/icons-material": "^9.4.0",
+    "@mui/material": "^9.4.0",
+    "@reduxjs/toolkit": "^2.12.0",
+    "@tanstack/react-query": "^5.103.1",
+    "axios": "^1.20.0",
+    "framer-motion": "^13.4.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-hook-form": "^7.89.0",
+    "react-redux": "^9.3.0",
+    "react-router-dom": "^7.18.4",
+    "recharts": "^3.10.1",
+    "simple-icons": "^16.33.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.8",
+    "sharp": "^0.35.4",
+    "vite": "^8.3.0"
+  }
+}
