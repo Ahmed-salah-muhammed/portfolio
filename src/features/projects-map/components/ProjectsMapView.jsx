@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import '@arcgis/map-components/components/arcgis-map';
 import '@arcgis/map-components/components/arcgis-zoom';
 import '@arcgis/map-components/components/arcgis-home';
 import '@arcgis/map-components/components/arcgis-expand';
 import '@arcgis/map-components/components/arcgis-basemap-gallery';
 import '@arcgis/map-components/main.css';
+import FeatureLayer from '@arcgis/core/layers/FeatureLayer.js';
 import Graphic from '@arcgis/core/Graphic.js';
 import Point from '@arcgis/core/geometry/Point.js';
 import Basemap from '@arcgis/core/Basemap.js';
@@ -27,7 +29,7 @@ import { useLanguage } from '@/i18n';
 // Initial view: Egypt and Saudi Arabia, where every mapped project sits.
 const CENTER = [37.5, 26];
 
-// "Show on map" zooms in far enough that a project is clearly focused.
+// "Show on map" zooms in far enough that a project is clearly focused and not inside a cluster.
 const FOCUS_ZOOM = 12;
 
 // The classic vector basemaps need no access token, so the gallery works with or without an API key.
@@ -36,6 +38,67 @@ const BASEMAP_GALLERY = new LocalBasemapsSource({
     (id) => Basemap.fromId(id),
   ),
 });
+
+// Nearby projects merge into a numbered cluster on Desktop web.
+const CLUSTERING = {
+  type: 'cluster',
+  clusterRadius: '75px',
+  clusterMinSize: '30px',
+  clusterMaxSize: '52px',
+  popupTemplate: {
+    title: '{cluster_count} projects in this area',
+    content: 'Click the cluster to zoom in and explore the individual projects.',
+    fieldInfos: [{ fieldName: 'cluster_count', format: { places: 0, digitSeparator: true } }],
+  },
+  labelingInfo: [
+    {
+      deconflictionStrategy: 'none',
+      labelPlacement: 'center-center',
+      labelExpressionInfo: { expression: 'Text($feature.cluster_count, "#,###")' },
+      symbol: {
+        type: 'text',
+        color: '#ffffff',
+        font: { size: 12, weight: 'bold', family: 'Noto Sans' },
+        haloColor: [15, 23, 42, 0.85],
+        haloSize: 1.2,
+      },
+    },
+  ],
+};
+
+const FIELDS = [
+  { name: 'oid', type: 'oid' },
+  { name: 'pid', type: 'integer' },
+  { name: 'num', type: 'string' },
+  { name: 'title', type: 'string' },
+  { name: 'summary', type: 'string' },
+  { name: 'type', type: 'string' },
+  { name: 'year', type: 'string' },
+  { name: 'place', type: 'string' },
+  { name: 'path', type: 'string' },
+  { name: 'code', type: 'string' },
+];
+
+const toGraphic = (project, i, lang) => {
+  const type = getProjectType(project);
+  const title = lang === 'ar' && project.titleAr ? project.titleAr : project.title;
+  const summary = lang === 'ar' && project.summaryAr ? project.summaryAr : project.summary;
+  return new Graphic({
+    geometry: new Point({ longitude: project.location.lng, latitude: project.location.lat }),
+    attributes: {
+      oid: i + 1,
+      pid: project.id,
+      num: formatProjectNumber(project.id),
+      title,
+      summary,
+      type,
+      year: String(project.year ?? safeText(project.period) ?? ''),
+      place: lang === 'ar' && project.location.labelAr ? project.location.labelAr : project.location.label,
+      path: getProjectPath(project),
+      code: project.type === 'client' ? '' : (safeUrl(project.links?.code) ?? ''),
+    },
+  });
+};
 
 // Popup body built as DOM so the "View project" button can use client-side routing.
 const buildPopup = (attrs, navigate, lang) => {
@@ -82,11 +145,11 @@ const buildPopup = (attrs, navigate, lang) => {
 };
 
 /**
- * A compact legend of our own matching the site's project-type colours.
+ * A compact legend matching the site's project-type colours.
  */
-function MapLegend() {
+function MapLegend({ isMobile }) {
   const { lang } = useLanguage();
-  const dot = (color) => ({
+  const dot = (color, extra) => ({
     width: 12,
     height: 12,
     borderRadius: '50%',
@@ -94,6 +157,7 @@ function MapLegend() {
     backgroundColor: color,
     border: '2px solid #fff',
     boxShadow: '0 0 0 1px rgba(15, 23, 42, 0.25)',
+    ...extra,
   });
 
   return (
@@ -132,6 +196,32 @@ function MapLegend() {
           </Typography>
         </Box>
       ))}
+
+      {!isMobile && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            mt: 0.5,
+            pt: 0.75,
+            borderTop: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Box
+            sx={dot('#4648d4', {
+              width: 16,
+              height: 16,
+              border: '2.5px solid #fff',
+              boxShadow: '0 0 0 3px rgba(70, 72, 212, 0.35)',
+            })}
+          />
+          <Typography variant="caption" sx={{ color: 'text.primary', fontWeight: 500 }}>
+            {lang === 'ar' ? 'مشاريع متجمعة (اضغط للتكبير)' : 'Several nearby — click to zoom'}
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 }
@@ -140,10 +230,18 @@ export default function ProjectsMapView({ mode }) {
   const { lang } = useLanguage();
   const navigate = useNavigate();
   const focus = useSelector(selectMapFocus);
+
+  const isNarrowScreen = useMediaQuery('(max-width: 900px)');
+  const isMobileDevice =
+    typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android|Mobile/i.test(navigator.userAgent);
+  const isMobile = isNarrowScreen || isMobileDevice;
+
   const mapRef = useRef(null);
   const viewRef = useRef(null);
+  const layerRef = useRef(null);
   const graphicsRef = useRef([]);
   const addedRef = useRef(false);
+
   const [ready, setReady] = useState(false);
   const [settled, setSettled] = useState(false);
   const [filter, setFilter] = useState('all');
@@ -156,9 +254,189 @@ export default function ProjectsMapView({ mode }) {
 
   const projects = getMappedProjects();
 
-  const initGraphics = useCallback(
-    async (mapEl) => {
+  // Mobile mode: Direct view.graphics (no workers, no clustering, 100% reliable on mobile Safari)
+  const initMobileGraphics = useCallback(
+    (view) => {
+      const graphics = [];
+      projects.forEach((p, i) => {
+        const type = getProjectType(p);
+        const title = lang === 'ar' && p.titleAr ? p.titleAr : p.title;
+        const summary = lang === 'ar' && p.summaryAr ? p.summaryAr : p.summary;
+        const num = formatProjectNumber(p.id);
+
+        const pin = new Graphic({
+          geometry: new Point({ longitude: p.location.lng, latitude: p.location.lat }),
+          symbol: {
+            type: 'simple-marker',
+            style: 'circle',
+            size: 16,
+            color: PROJECT_TYPE_COLORS[type],
+            outline: { color: '#ffffff', width: 2.5 },
+          },
+          attributes: {
+            oid: i + 1,
+            pid: p.id,
+            num,
+            title,
+            summary,
+            type,
+            year: String(p.year ?? safeText(p.period) ?? ''),
+            place: lang === 'ar' && p.location.labelAr ? p.location.labelAr : p.location.label,
+            path: getProjectPath(p),
+            code: p.type === 'client' ? '' : (safeUrl(p.links?.code) ?? ''),
+          },
+          popupTemplate: {
+            title: '{num} · {title}',
+            content: ({ graphic }) => buildPopup(graphic.attributes, navigate, lang),
+          },
+        });
+
+        const label = new Graphic({
+          geometry: new Point({ longitude: p.location.lng, latitude: p.location.lat }),
+          symbol: {
+            type: 'text',
+            text: num,
+            color: '#0f172a',
+            haloColor: '#ffffff',
+            haloSize: 2,
+            font: { size: 10, weight: 'bold', family: 'Noto Sans, sans-serif' },
+            yoffset: 14,
+          },
+          attributes: {
+            pid: p.id,
+            type,
+            isLabel: true,
+          },
+        });
+
+        graphics.push(pin, label);
+      });
+
+      view.graphics.addMany(graphics);
+      graphicsRef.current = graphics;
+
+      // Click interaction: if user clicks the number label, open the pin's popup
+      view.on('click', async (evt) => {
+        const response = await view.hitTest(evt).catch(() => null);
+        const hit = response?.results?.find((r) => r.graphic?.attributes?.pid);
+        if (hit) {
+          const targetPin = hit.graphic.attributes?.isLabel
+            ? graphicsRef.current?.find((g) => g.attributes.pid === hit.graphic.attributes.pid && !g.attributes.isLabel)
+            : hit.graphic;
+          if (targetPin) {
+            view.openPopup({ features: [targetPin], location: targetPin.geometry });
+          }
+        }
+      });
+
+      setReady(true);
+      setSettled(true);
+    },
+    [projects, navigate, lang],
+  );
+
+  // Desktop mode: FeatureLayer with clustering
+  const initDesktopLayer = useCallback(
+    (map, view) => {
+      try {
+        const layer = new FeatureLayer({
+          title: 'Projects',
+          source: projects.map((p, i) => toGraphic(p, i, lang)),
+          fields: FIELDS,
+          objectIdField: 'oid',
+          geometryType: 'point',
+          spatialReference: { wkid: 4326 },
+          outFields: ['*'],
+          featureReduction: {
+            ...CLUSTERING,
+            symbol: {
+              type: 'simple-marker',
+              style: 'circle',
+              color: [70, 72, 212, 0.92],
+              outline: { color: [255, 255, 255, 0.95], width: 2.5 },
+            },
+          },
+          renderer: {
+            type: 'unique-value',
+            field: 'type',
+            legendOptions: { title: 'Project type' },
+            uniqueValueInfos: PROJECT_TYPES.map((t) => ({
+              value: t.key,
+              label: t.label,
+              symbol: {
+                type: 'simple-marker',
+                style: 'circle',
+                size: 16,
+                color: PROJECT_TYPE_COLORS[t.key],
+                outline: { color: '#ffffff', width: 2 },
+              },
+            })),
+          },
+          labelingInfo: [
+            {
+              labelExpressionInfo: { expression: '$feature.num' },
+              labelPlacement: 'above-center',
+              symbol: {
+                type: 'text',
+                color: '#0f172a',
+                haloColor: '#ffffff',
+                haloSize: 1.5,
+                font: { size: 10, weight: 'bold', family: 'Noto Sans' },
+              },
+            },
+          ],
+          popupTemplate: {
+            title: '{num} · {title}',
+            outFields: ['*'],
+            content: ({ graphic }) => buildPopup(graphic.attributes, navigate, lang),
+          },
+        });
+
+        // Click zoom for clusters
+        view.on('click', async (evt) => {
+          const response = await view.hitTest(evt).catch(() => null);
+          const clusterHit = response?.results?.find((r) => r.graphic?.isAggregate);
+          if (clusterHit?.graphic?.geometry) {
+            view
+              .goTo({ target: clusterHit.graphic.geometry, zoom: view.zoom + 2 }, { duration: 600 })
+              .catch(() => {});
+          }
+        });
+
+        // Robust fallback: if FeatureLayer fails to load on this browser, switch to mobile graphics
+        layer.load().then(
+          () => {
+            setReady(true);
+            setSettled(true);
+          },
+          (err) => {
+            console.warn('FeatureLayer failed to load, falling back to direct graphics:', err);
+            try {
+              map.remove(layer);
+            } catch (removeErr) {
+              console.warn('Failed to remove layer:', removeErr);
+            }
+            layerRef.current = null;
+            initMobileGraphics(view);
+          },
+        );
+
+        map.add(layer);
+        layerRef.current = layer;
+      } catch (err) {
+        console.warn('FeatureLayer setup failed, falling back to direct graphics:', err);
+        initMobileGraphics(view);
+      }
+    },
+    [projects, navigate, lang, initMobileGraphics],
+  );
+
+  const onViewReady = useCallback(
+    async (event) => {
+      setReady(true);
+      const mapEl = event?.target ?? event;
       if (!mapEl || addedRef.current) return;
+
       try {
         if (typeof mapEl.componentOnReady === 'function') {
           await mapEl.componentOnReady();
@@ -173,107 +451,32 @@ export default function ProjectsMapView({ mode }) {
 
         friendlyNavigation(view);
 
-        const graphics = [];
-        projects.forEach((p, i) => {
-          const type = getProjectType(p);
-          const title = lang === 'ar' && p.titleAr ? p.titleAr : p.title;
-          const summary = lang === 'ar' && p.summaryAr ? p.summaryAr : p.summary;
-          const num = formatProjectNumber(p.id);
-
-          const pin = new Graphic({
-            geometry: new Point({ longitude: p.location.lng, latitude: p.location.lat }),
-            symbol: {
-              type: 'simple-marker',
-              style: 'circle',
-              size: 16,
-              color: PROJECT_TYPE_COLORS[type],
-              outline: { color: '#ffffff', width: 2.5 },
-            },
-            attributes: {
-              oid: i + 1,
-              pid: p.id,
-              num,
-              title,
-              summary,
-              type,
-              year: String(p.year ?? safeText(p.period) ?? ''),
-              place: lang === 'ar' && p.location.labelAr ? p.location.labelAr : p.location.label,
-              path: getProjectPath(p),
-              code: p.type === 'client' ? '' : (safeUrl(p.links?.code) ?? ''),
-            },
-            popupTemplate: {
-              title: '{num} · {title}',
-              content: ({ graphic }) => buildPopup(graphic.attributes, navigate, lang),
-            },
-          });
-
-          const label = new Graphic({
-            geometry: new Point({ longitude: p.location.lng, latitude: p.location.lat }),
-            symbol: {
-              type: 'text',
-              text: num,
-              color: '#0f172a',
-              haloColor: '#ffffff',
-              haloSize: 2,
-              font: { size: 10, weight: 'bold', family: 'Noto Sans, sans-serif' },
-              yoffset: 14,
-            },
-            attributes: {
-              pid: p.id,
-              type,
-              isLabel: true,
-            },
-          });
-
-          graphics.push(pin, label);
-        });
-
-        view.graphics.addMany(graphics);
-        graphicsRef.current = graphics;
-
-        // Click handler: if user clicks the number label, open the main pin's popup
-        view.on('click', async (evt) => {
-          const response = await view.hitTest(evt).catch(() => null);
-          const hit = response?.results?.find((r) => r.graphic?.attributes?.pid);
-          if (hit) {
-            const targetPin = hit.graphic.attributes?.isLabel
-              ? graphicsRef.current?.find((g) => g.attributes.pid === hit.graphic.attributes.pid && !g.attributes.isLabel)
-              : hit.graphic;
-            if (targetPin) {
-              view.openPopup({ features: [targetPin], location: targetPin.geometry });
-            }
-          }
-        });
-
         // Hover cursor pointer
         view.on('pointer-move', async (evt) => {
           const response = await view.hitTest(evt).catch(() => null);
-          const hasPin = response?.results?.some((r) => r.graphic?.attributes?.pid);
+          const hasPin = response?.results?.some((r) => r.graphic?.attributes?.pid || r.graphic?.isAggregate);
           if (view.container) {
             view.container.style.cursor = hasPin ? 'pointer' : 'default';
           }
         });
 
-        setReady(true);
-        setSettled(true);
+        if (isMobile) {
+          initMobileGraphics(view);
+        } else {
+          const activeMap = view.map || mapEl.map;
+          if (activeMap) {
+            initDesktopLayer(activeMap, view);
+          } else {
+            initMobileGraphics(view);
+          }
+        }
       } catch (err) {
-        console.warn('Error initializing projects graphics:', err);
+        console.warn('Error in onViewReady:', err);
         setReady(true);
         setSettled(true);
       }
     },
-    [projects, navigate, lang],
-  );
-
-  const onViewReady = useCallback(
-    (event) => {
-      setReady(true);
-      const mapEl = event?.target ?? event;
-      if (mapEl) {
-        initGraphics(mapEl);
-      }
-    },
-    [initGraphics],
+    [isMobile, initMobileGraphics, initDesktopLayer],
   );
 
   useEffect(() => {
@@ -282,7 +485,7 @@ export default function ProjectsMapView({ mode }) {
 
     const handleReady = () => {
       if (mapEl.view && !addedRef.current) {
-        initGraphics(mapEl);
+        onViewReady({ target: mapEl });
       }
     };
 
@@ -294,15 +497,19 @@ export default function ProjectsMapView({ mode }) {
     return () => {
       mapEl.removeEventListener('arcgisViewReadyChange', handleReady);
     };
-  }, [initGraphics]);
+  }, [onViewReady]);
 
   // Type filter
   useEffect(() => {
+    if (layerRef.current) {
+      layerRef.current.definitionExpression = filter === 'all' ? null : `type = '${filter}'`;
+    }
     const graphics = graphicsRef.current;
-    if (!graphics || graphics.length === 0) return;
-    graphics.forEach((g) => {
-      g.visible = filter === 'all' || g.attributes.type === filter;
-    });
+    if (graphics && graphics.length > 0) {
+      graphics.forEach((g) => {
+        g.visible = filter === 'all' || g.attributes.type === filter;
+      });
+    }
   }, [filter, ready]);
 
   // Language update
@@ -324,14 +531,33 @@ export default function ProjectsMapView({ mode }) {
   // "Show on map" from a project card: fly there and open its popup.
   useEffect(() => {
     const view = viewRef.current;
+    if (!ready || !view || focus.projectId == null) return;
+
+    if (layerRef.current) {
+      let cancelled = false;
+      (async () => {
+        const { features } = await layerRef.current.queryFeatures({
+          where: `pid = ${Number(focus.projectId)}`,
+          returnGeometry: true,
+          outFields: ['*'],
+        });
+        const feature = features[0];
+        if (cancelled || !feature) return;
+        await view.goTo({ target: feature.geometry, zoom: FOCUS_ZOOM }, { duration: 1400 }).catch(() => {});
+        if (!cancelled) view.openPopup({ features: [feature], location: feature.geometry });
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }
+
     const graphics = graphicsRef.current;
-    if (!ready || !view || !graphics || focus.projectId == null) return;
-
-    const pin = graphics.find((g) => g.attributes?.pid === Number(focus.projectId) && !g.attributes?.isLabel);
-    if (!pin) return;
-
-    view.goTo({ target: pin.geometry, zoom: FOCUS_ZOOM }, { duration: 1400 }).catch(() => {});
-    view.openPopup({ features: [pin], location: pin.geometry });
+    if (graphics && graphics.length > 0) {
+      const pin = graphics.find((g) => g.attributes?.pid === Number(focus.projectId) && !g.attributes?.isLabel);
+      if (!pin) return;
+      view.goTo({ target: pin.geometry, zoom: FOCUS_ZOOM }, { duration: 1400 }).catch(() => {});
+      view.openPopup({ features: [pin], location: pin.geometry });
+    }
   }, [focus.nonce, focus.projectId, ready]);
 
   return (
@@ -430,7 +656,7 @@ export default function ProjectsMapView({ mode }) {
             );
           })}
         </Box>
-        <MapLegend />
+        <MapLegend isMobile={isMobile} />
       </arcgis-map>
 
       <Box
