@@ -11,7 +11,6 @@ import '@arcgis/map-components/components/arcgis-basemap-gallery';
 import '@arcgis/map-components/main.css';
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer.js';
 import Graphic from '@arcgis/core/Graphic.js';
-import * as reactiveUtils from '@arcgis/core/core/reactiveUtils.js';
 import Box from '@mui/material/Box';
 import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
@@ -233,31 +232,10 @@ export default function ProjectsMapView({ mode }) {
 
   const projects = getMappedProjects();
 
-  const onViewReady = useCallback(
-    async (event) => {
-      const mapEl = event?.target ?? event;
-      if (!mapEl || layerRef.current) return;
-
+  const addFeatureLayer = useCallback(
+    (map) => {
+      if (!map || layerRef.current) return;
       try {
-        if (typeof mapEl.componentOnReady === 'function') {
-          await mapEl.componentOnReady();
-        }
-
-        const view = mapEl.view;
-        if (!view) return;
-
-        await view.when();
-        if (layerRef.current) return;
-
-        friendlyNavigation(view);
-
-        const map = view.map || mapEl.map;
-        if (!map) {
-          console.warn('Map not ready on view');
-          setSettled(true);
-          return;
-        }
-
         const layer = new FeatureLayer({
           title: 'Projects',
           source: projects.map((p, i) => toGraphic(p, i, lang)),
@@ -268,7 +246,6 @@ export default function ProjectsMapView({ mode }) {
           outFields: ['*'],
           featureReduction: {
             ...CLUSTERING,
-            // Upgraded to brand primary indigo with crisp luminous outline and halo
             symbol: {
               type: 'simple-marker',
               style: 'circle',
@@ -301,7 +278,6 @@ export default function ProjectsMapView({ mode }) {
                 color: '#0f172a',
                 haloColor: '#ffffff',
                 haloSize: 1.5,
-                // Must be a family Esri's font service hosts — 'Arial' bold hangs the layer view.
                 font: { size: 10, weight: 'bold', family: 'Noto Sans' },
               },
             },
@@ -316,38 +292,72 @@ export default function ProjectsMapView({ mode }) {
         map.add(layer);
         layerRef.current = layer;
         setReady(true);
+        setSettled(true);
+      } catch (err) {
+        console.warn('Error creating projects layer:', err);
+        setReady(true);
+        setSettled(true);
+      }
+    },
+    [projects, navigate, lang],
+  );
 
-        // Smoothly zoom in when clicking on a cluster
-        view.on('click', async (evt) => {
-          try {
-            const response = await view.hitTest(evt);
+  const onViewReady = useCallback(
+    async (event) => {
+      // 1. Immediately flag ready so UI controls and state activate without delay
+      setReady(true);
+
+      const mapEl = event?.target ?? event;
+      if (!mapEl) return;
+
+      try {
+        if (typeof mapEl.componentOnReady === 'function') {
+          await mapEl.componentOnReady();
+        }
+
+        const map = mapEl.map || mapEl.view?.map;
+        if (map && !layerRef.current) {
+          addFeatureLayer(map);
+        }
+
+        const view = mapEl.view;
+        if (!view) return;
+
+        // Friendly navigation in its own try/catch so it never blocks layer rendering
+        try {
+          friendlyNavigation(view);
+        } catch (e) {
+          console.warn('Friendly navigation setup skipped:', e);
+        }
+
+        // Cluster hit-testing in its own try/catch
+        try {
+          view.on('click', async (evt) => {
+            const response = await view.hitTest(evt).catch(() => null);
             const clusterHit = response?.results?.find((r) => r.graphic?.isAggregate);
             if (clusterHit?.graphic?.geometry) {
               view
                 .goTo({ target: clusterHit.graphic.geometry, zoom: view.zoom + 2 }, { duration: 600 })
                 .catch(() => {});
             }
-          } catch {
-            // ignore
-          }
-        });
+          });
+        } catch (e) {
+          console.warn('Cluster hit test setup skipped:', e);
+        }
 
-        // Hide the loading veil once the points are actually on screen, with a fallback
-        // so a slow font/tile request can never leave it up forever.
-        const fallback = setTimeout(() => setSettled(true), 6000);
-        view
-          .whenLayerView(layer)
-          .then((lv) => reactiveUtils.whenOnce(() => !lv.updating))
-          .then(() => setSettled(true))
-          .catch(() => setSettled(true))
-          .finally(() => clearTimeout(fallback));
+        // Await view readiness to ensure layer is attached if map wasn't ready synchronously
+        await view.when();
+        const activeMap = view.map || mapEl.map;
+        if (activeMap && !layerRef.current) {
+          addFeatureLayer(activeMap);
+        }
       } catch (err) {
-        console.warn('Error initializing projects feature layer:', err);
+        console.warn('Error in onViewReady:', err);
+      } finally {
         setSettled(true);
-        setReady(true);
       }
     },
-    [projects, navigate, lang],
+    [addFeatureLayer],
   );
 
   // Native event listener & immediate check for Safari iOS compatibility

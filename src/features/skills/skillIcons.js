@@ -1,6 +1,5 @@
 import {
   siArcgis,
-  siClaude,
   siCss,
   siDotnet,
   siExpress,
@@ -115,15 +114,11 @@ export const SKILL_ICONS = {
 
   // AI & Automation
   'Model Context Protocol (MCP)': brand(siModelcontextprotocol),
-  'Claude AI Integration': brand(siClaude),
   'AI Agents & Workflows': mui(SmartToyOutlinedIcon, '#A78BFA'),
   n8n: brand(siN8n),
   RAG: mui(ManageSearchRoundedIcon, '#34D399'),
-  'Function Calling': mui(FunctionsRoundedIcon, '#F472B6'),
-  'Fine-Tuning': mui(TuneRoundedIcon, '#FBBF24'),
   'Hugging Face': brand(siHuggingface),
   LangChain: brand(siLangchain),
-  GenAI: mui(AutoAwesomeRoundedIcon, '#C084FC'),
 
   // Foundations
   OOP: mui(CategoryOutlinedIcon, '#60A5FA'),

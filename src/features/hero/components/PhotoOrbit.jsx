@@ -51,24 +51,6 @@ export default function PhotoOrbit() {
         mx: 'auto',
       }}
     >
-      {/* Soft background mask to isolate photo and orbit from background patterns */}
-      <Box
-        aria-hidden
-        sx={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          width: '110%',
-          aspectRatio: '1 / 1',
-          transform: 'translate(-50%, -50%)',
-          borderRadius: '50%',
-          zIndex: 0,
-          pointerEvents: 'none',
-          background: (t) =>
-            `radial-gradient(circle at 50% 50%, ${t.palette.background.default} 62%, transparent 96%)`,
-        }}
-      />
-
       {/* 0 — Esri & Dev Hexagonal Honeycomb Matrix (all the way in the back) */}
       <Box sx={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
         <HexTechMatrix />

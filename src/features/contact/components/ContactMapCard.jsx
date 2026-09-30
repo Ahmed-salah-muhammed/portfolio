@@ -6,6 +6,8 @@ import { useColorScheme } from '@mui/material/styles';
 import { ErrorBoundary } from '@/shared/components/ui';
 import useNearViewport from '@/hooks/useNearViewport.js';
 
+import { useLanguage } from '@/i18n';
+
 const ContactMapView = lazy(() => import('./ContactMapView.jsx'));
 
 function Placeholder({ children }) {
@@ -32,6 +34,7 @@ function Placeholder({ children }) {
  * map (the SDK is then already cached), or sooner if scrolled near.
  */
 export default function ContactMapCard() {
+  const { lang } = useLanguage();
   const { mode, systemMode } = useColorScheme();
   const resolved = (mode === 'system' ? systemMode : mode) ?? 'light';
   const [ref, near] = useNearViewport('350px');
@@ -55,7 +58,9 @@ export default function ContactMapCard() {
         name="contact-map"
         fallback={
           <Placeholder>
-            <Typography variant="body2">The map could not be loaded right now.</Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {lang === 'ar' ? 'القاهرة، مصر (تعذّر تحميل الخريطة)' : 'Cairo, Egypt (Map unavailable)'}
+            </Typography>
           </Placeholder>
         }
       >

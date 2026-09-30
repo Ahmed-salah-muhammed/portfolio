@@ -117,6 +117,19 @@
       href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap"
       rel="stylesheet"
     />
+    <!-- Safari < 17.4 ES2024 polyfill for ArcGIS MapView initialization -->
+    <script>
+      if (typeof Promise.withResolvers === 'undefined') {
+        Promise.withResolvers = function () {
+          var resolve, reject;
+          var promise = new Promise(function (res, rej) {
+            resolve = res;
+            reject = rej;
+          });
+          return { promise: promise, resolve: resolve, reject: reject };
+        };
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

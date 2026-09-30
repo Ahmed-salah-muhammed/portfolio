@@ -42,7 +42,7 @@ function MapPlaceholder({ children }) {
 import { useLanguage } from '@/i18n';
 
 export default function ProjectsMapSection() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const dispatch = useDispatch();
   const { mode, systemMode } = useColorScheme();
   const resolvedMode = (mode === 'system' ? systemMode : mode) ?? 'light';
@@ -78,7 +78,17 @@ export default function ProjectsMapSection() {
             name="projects-map"
             fallback={
               <MapPlaceholder>
-                <Typography variant="body2">The map could not be loaded right now.</Typography>
+                <Typography variant="body1" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.75 }}>
+                  {lang === 'ar' ? 'تعذّر تحميل خريطة المشاريع التفاعلية' : 'Unable to load interactive map'}
+                </Typography>
+                <Typography variant="body2" sx={{ maxWidth: 460, color: 'text.secondary', mb: 2, lineHeight: 1.6 }}>
+                  {lang === 'ar'
+                    ? 'يرجى التحقق من اتصال الإنترنت، أو يمكنك استعراض كافة المشاريع مباشرة من البطاقات في القسم أعلاه.'
+                    : 'Please check your internet connection, or explore all projects directly from the cards section above.'}
+                </Typography>
+                <Button variant="outlined" size="small" onClick={() => window.location.reload()}>
+                  {lang === 'ar' ? 'إعادة المحاولة' : 'Retry'}
+                </Button>
               </MapPlaceholder>
             }
           >
