@@ -108,7 +108,7 @@ export const SKILL_ICONS = {
   // Cloud (AWS)
   'AWS Cloud Practitioner': text('aws', AWS_ORANGE),
   EC2: text('EC2', AWS_ORANGE),
-  'EBS Multi-Attach': text('EBS', AWS_ORANGE),
+  'EBS': text('EBS', AWS_ORANGE),
   EFS: text('EFS', AWS_ORANGE),
   'Cloud Architecture': mui(CloudQueueRoundedIcon, '#60A5FA'),
   'Scalable Systems': mui(AccountTreeOutlinedIcon, '#60A5FA'),

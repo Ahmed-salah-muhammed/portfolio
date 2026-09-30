@@ -5,6 +5,11 @@ import esriConfig from '@arcgis/core/config.js';
 const API_KEY = import.meta.env.VITE_ARCGIS_API_KEY ?? '';
 if (API_KEY) esriConfig.apiKey = API_KEY;
 
+// Explicitly lock assets and fonts to Esri's official CDN so Vite/Vercel SPA routing
+// never returns HTML index pages for WebAssembly/worker/icon requests.
+esriConfig.assetsPath = 'https://js.arcgis.com/5.1.26/@arcgis/core/assets';
+esriConfig.fontsUrl = 'https://static.arcgis.com/fonts';
+
 /**
  * The newer "arcgis/…" basemap styles need an access token; the classic vector
  * basemaps work without one. Use the nicer styles when a key is configured.

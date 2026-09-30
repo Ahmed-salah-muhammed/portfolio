@@ -34,7 +34,7 @@ function Placeholder({ children }) {
 export default function ContactMapCard() {
   const { mode, systemMode } = useColorScheme();
   const resolved = (mode === 'system' ? systemMode : mode) ?? 'light';
-  const [ref, near] = useNearViewport('400px', { preloadAfter: 1200 });
+  const [ref, near] = useNearViewport('350px');
 
   return (
     <Box

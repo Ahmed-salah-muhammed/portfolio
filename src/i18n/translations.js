@@ -121,7 +121,7 @@ export const TRANSLATIONS = {
       'Python automation of repetitive GIS pipelines with ArcPy, plus Model Context Protocol servers and AI workflows that let agents operate ArcGIS and QGIS directly.',
     'services.cloud.title': 'Cloud GIS on AWS',
     'services.cloud.desc':
-      'Deploying geospatial systems on AWS as an AWS Certified Cloud Practitioner — EC2, EBS Multi-Attach and EFS for scalable, cloud-hosted GIS architecture.',
+      'Deploying geospatial systems on AWS as an AWS Certified Cloud Practitioner — EC2, EBS and EFS for scalable, cloud-hosted GIS architecture.',
 
     // Projects
     'projects.title': 'Projects',

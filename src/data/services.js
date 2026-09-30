@@ -49,7 +49,7 @@ export const SERVICES = [
     title: 'Cloud GIS on AWS',
     icon: 'cloud',
     description:
-      'Deploying geospatial systems on AWS as an AWS Certified Cloud Practitioner — EC2, EBS Multi-Attach and EFS for scalable, cloud-hosted GIS architecture.',
+      'Deploying geospatial systems on AWS as an AWS Certified Cloud Practitioner — EC2, EBS and EFS for scalable, cloud-hosted GIS architecture.',
     skills: ['AWS Cloud Practitioner', 'EC2', 'EFS', 'Cloud Architecture'],
   },
 ];

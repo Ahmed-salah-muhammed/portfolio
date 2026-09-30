@@ -6,14 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import '@arcgis/map-components/components/arcgis-map';
 import '@arcgis/map-components/components/arcgis-zoom';
 import '@arcgis/map-components/components/arcgis-home';
-import '@arcgis/map-components/components/arcgis-fullscreen';
 import '@arcgis/map-components/components/arcgis-expand';
 import '@arcgis/map-components/components/arcgis-basemap-gallery';
-import '@esri/calcite-components/components/calcite-segmented-control';
-import '@esri/calcite-components/components/calcite-segmented-control-item';
-import '@esri/calcite-components/components/calcite-button';
 import '@arcgis/map-components/main.css';
-import '@esri/calcite-components/main.css';
 import FeatureLayer from '@arcgis/core/layers/FeatureLayer.js';
 import Graphic from '@arcgis/core/Graphic.js';
 import * as reactiveUtils from '@arcgis/core/core/reactiveUtils.js';
@@ -126,23 +121,22 @@ const buildPopup = (attrs, navigate, lang) => {
   summary.style.cssText = 'margin:0;line-height:1.55;font-size:13.5px;';
 
   const actions = document.createElement('div');
-  actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;';
-  const open = document.createElement('calcite-button');
-  open.textContent = lang === 'ar' ? 'عرض المشروع' : 'View project';
-  open.setAttribute('icon-end', lang === 'ar' ? 'arrow-left' : 'arrow-right');
-  open.setAttribute('scale', 's');
+  actions.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;';
+  const open = document.createElement('button');
+  open.textContent = lang === 'ar' ? 'عرض المشروع ←' : 'View project →';
+  open.style.cssText =
+    'display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#4648d4;color:#ffffff;border:none;border-radius:6px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;';
   open.addEventListener('click', () => navigate(attrs.path));
   actions.append(open);
 
   if (attrs.code) {
-    const code = document.createElement('calcite-button');
-    code.textContent = lang === 'ar' ? 'الكود المصدري' : 'Source code';
-    code.setAttribute('appearance', 'outline');
-    code.setAttribute('icon-start', 'code');
-    code.setAttribute('scale', 's');
-    code.setAttribute('href', attrs.code);
-    code.setAttribute('target', '_blank');
-    code.setAttribute('rel', 'noopener noreferrer');
+    const code = document.createElement('a');
+    code.textContent = lang === 'ar' ? '</> الكود المصدري' : '</> Source code';
+    code.href = attrs.code;
+    code.target = '_blank';
+    code.rel = 'noopener noreferrer';
+    code.style.cssText =
+      'display:inline-flex;align-items:center;justify-content:center;gap:6px;background:transparent;color:inherit;border:1px solid rgba(140,140,140,0.4);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;text-decoration:none;cursor:pointer;font-family:inherit;';
     actions.append(code);
   }
 
@@ -240,13 +234,30 @@ export default function ProjectsMapView({ mode }) {
   const projects = getMappedProjects();
 
   const onViewReady = useCallback(
-    (event) => {
+    async (event) => {
       const mapEl = event?.target ?? event;
-      if (!mapEl || !mapEl.view || layerRef.current) return;
-
-      friendlyNavigation(mapEl.view);
+      if (!mapEl || layerRef.current) return;
 
       try {
+        if (typeof mapEl.componentOnReady === 'function') {
+          await mapEl.componentOnReady();
+        }
+
+        const view = mapEl.view;
+        if (!view) return;
+
+        await view.when();
+        if (layerRef.current) return;
+
+        friendlyNavigation(view);
+
+        const map = view.map || mapEl.map;
+        if (!map) {
+          console.warn('Map not ready on view');
+          setSettled(true);
+          return;
+        }
+
         const layer = new FeatureLayer({
           title: 'Projects',
           source: projects.map((p, i) => toGraphic(p, i, lang)),
@@ -302,18 +313,18 @@ export default function ProjectsMapView({ mode }) {
           },
         });
 
-        mapEl.map.add(layer);
+        map.add(layer);
         layerRef.current = layer;
         setReady(true);
 
         // Smoothly zoom in when clicking on a cluster
-        mapEl.view.on('click', async (evt) => {
+        view.on('click', async (evt) => {
           try {
-            const response = await mapEl.view.hitTest(evt);
+            const response = await view.hitTest(evt);
             const clusterHit = response?.results?.find((r) => r.graphic?.isAggregate);
             if (clusterHit?.graphic?.geometry) {
-              mapEl.view
-                .goTo({ target: clusterHit.graphic.geometry, zoom: mapEl.view.zoom + 2 }, { duration: 600 })
+              view
+                .goTo({ target: clusterHit.graphic.geometry, zoom: view.zoom + 2 }, { duration: 600 })
                 .catch(() => {});
             }
           } catch {
@@ -324,7 +335,7 @@ export default function ProjectsMapView({ mode }) {
         // Hide the loading veil once the points are actually on screen, with a fallback
         // so a slow font/tile request can never leave it up forever.
         const fallback = setTimeout(() => setSettled(true), 6000);
-        mapEl.view
+        view
           .whenLayerView(layer)
           .then((lv) => reactiveUtils.whenOnce(() => !lv.updating))
           .then(() => setSettled(true))
@@ -398,39 +409,94 @@ export default function ProjectsMapView({ mode }) {
         center={CENTER}
         zoom={5}
         onarcgisViewReadyChange={onViewReady}
-        style={{ width: '100%', height: '100%', display: 'block' }}
+        style={{ width: '100%', height: '100%', display: 'block', position: 'relative', minHeight: '400px' }}
       >
-      <arcgis-zoom slot="top-left" />
-      <arcgis-home slot="top-left" />
-      <arcgis-fullscreen slot="top-left" />
-      <arcgis-expand slot="top-left" expand-tooltip="Basemap gallery">
-        <arcgis-basemap-gallery source={BASEMAP_GALLERY} />
-      </arcgis-expand>
-      <div slot="top-right" style={{ maxWidth: 'min(420px, calc(100vw - 80px))', overflowX: 'auto' }}>
-        <calcite-segmented-control
-          scale="s"
-          oncalciteSegmentedControlChange={(e) => setFilter(e.target.value)}
+        <arcgis-zoom slot="top-left" />
+        <arcgis-home slot="top-left" />
+        <arcgis-expand slot="top-left" expand-tooltip="Basemap gallery">
+          <arcgis-basemap-gallery source={BASEMAP_GALLERY} />
+        </arcgis-expand>
+
+        <Box
+          slot="top-right"
+          sx={{
+            m: 1.25,
+            p: 0.5,
+            borderRadius: 999,
+            backgroundColor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            boxShadow: '0 4px 14px rgba(15, 23, 42, 0.16)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 0.5,
+            maxWidth: 'min(440px, calc(100vw - 32px))',
+            overflowX: 'auto',
+            scrollbarWidth: 'none',
+            '&::-webkit-scrollbar': { display: 'none' },
+          }}
         >
-          <calcite-segmented-control-item value="all" checked={filter === 'all' || undefined}>
+          <Box
+            component="button"
+            type="button"
+            onClick={() => setFilter('all')}
+            sx={{
+              border: 'none',
+              outline: 'none',
+              cursor: 'pointer',
+              px: 1.5,
+              py: 0.6,
+              borderRadius: 999,
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              whiteSpace: 'nowrap',
+              transition: 'all .2s ease',
+              backgroundColor: filter === 'all' ? 'primary.main' : 'transparent',
+              color: filter === 'all' ? '#ffffff' : 'text.primary',
+              '&:hover': {
+                backgroundColor: filter === 'all' ? 'primary.main' : 'action.hover',
+              },
+            }}
+          >
             {lang === 'ar' ? 'الكل' : 'All'}
-          </calcite-segmented-control-item>
-          {PROJECT_TYPES.map((t) => (
-            <calcite-segmented-control-item
-              key={t.key}
-              value={t.key}
-              checked={filter === t.key || undefined}
-            >
-              {lang === 'ar'
-                ? t.key === 'fullstack'
-                  ? 'تطوير شامل'
-                  : t.key === 'gis'
-                  ? 'نظم جغرافية'
-                  : 'ذكاء اصطناعي'
-                : t.label}
-            </calcite-segmented-control-item>
-          ))}
-        </calcite-segmented-control>
-      </div>
+          </Box>
+          {PROJECT_TYPES.map((t) => {
+            const active = filter === t.key;
+            return (
+              <Box
+                key={t.key}
+                component="button"
+                type="button"
+                onClick={() => setFilter(t.key)}
+                sx={{
+                  border: 'none',
+                  outline: 'none',
+                  cursor: 'pointer',
+                  px: 1.5,
+                  py: 0.6,
+                  borderRadius: 999,
+                  fontSize: '0.78rem',
+                  fontWeight: 700,
+                  whiteSpace: 'nowrap',
+                  transition: 'all .2s ease',
+                  backgroundColor: active ? PROJECT_TYPE_COLORS[t.key] : 'transparent',
+                  color: active ? '#ffffff' : 'text.primary',
+                  '&:hover': {
+                    backgroundColor: active ? PROJECT_TYPE_COLORS[t.key] : 'action.hover',
+                  },
+                }}
+              >
+                {lang === 'ar'
+                  ? t.key === 'fullstack'
+                    ? 'تطوير شامل'
+                    : t.key === 'gis'
+                    ? 'نظم جغرافية'
+                    : 'ذكاء اصطناعي'
+                  : t.label}
+              </Box>
+            );
+          })}
+        </Box>
         <MapLegend />
       </arcgis-map>
 

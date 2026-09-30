@@ -399,7 +399,7 @@ export const SKILLS = [
     items: [
       'AWS Cloud Practitioner',
       'EC2',
-      'EBS Multi-Attach',
+      'EBS',
       'EFS',
       'Cloud Architecture',
       'Scalable Systems',
@@ -409,15 +409,11 @@ export const SKILLS = [
     category: 'AI & Automation',
     items: [
       'Model Context Protocol (MCP)',
-      'Claude AI Integration',
       'AI Agents & Workflows',
       'n8n',
       'RAG',
-      'Function Calling',
-      'Fine-Tuning',
       'Hugging Face',
       'LangChain',
-      'GenAI',
     ],
   },
   {
