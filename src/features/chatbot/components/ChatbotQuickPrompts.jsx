@@ -1,21 +1,21 @@
 // src/features/chatbot/components/ChatbotQuickPrompts.jsx
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import MemoryRoundedIcon from '@mui/icons-material/MemoryRounded';
-import LayersRoundedIcon from '@mui/icons-material/LayersRounded';
-import CreditCardRoundedIcon from '@mui/icons-material/CreditCardRounded';
-import MapRoundedIcon from '@mui/icons-material/MapRounded';
+import PersonOutlineRoundedIcon from '@mui/icons-material/PersonOutlineRounded';
+import CodeRoundedIcon from '@mui/icons-material/CodeRounded';
+import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined';
+import WorkOutlineRoundedIcon from '@mui/icons-material/WorkOutlineRounded';
 import { QUICK_PROMPTS } from '../chatbotData.js';
 import { useLanguage } from '@/i18n';
 
 const ICONS = {
-  memory: MemoryRoundedIcon,
-  layers: LayersRoundedIcon,
-  creditCard: CreditCardRoundedIcon,
-  map: MapRoundedIcon,
+  person: PersonOutlineRoundedIcon,
+  services: CodeRoundedIcon,
+  projects: RocketLaunchOutlinedIcon,
+  contact: WorkOutlineRoundedIcon,
 };
 
-export default function ChatbotQuickPrompts({ onSelectPrompt }) {
+export default function ChatbotQuickPrompts({ isDark, onSelectPrompt }) {
   const { lang } = useLanguage();
 
   return (
@@ -32,9 +32,9 @@ export default function ChatbotQuickPrompts({ onSelectPrompt }) {
       }}
     >
       {QUICK_PROMPTS.map((item) => {
-        const IconComponent = ICONS[item.icon] || MemoryRoundedIcon;
-        const label = lang === 'ar' && item.labelAr ? item.labelAr : item.label;
-        const query = lang === 'ar' && item.queryAr ? item.queryAr : item.query;
+        const IconComponent = ICONS[item.icon] || PersonOutlineRoundedIcon;
+        const label = lang === 'ar' ? item.label : item.labelEn;
+        const query = lang === 'ar' ? item.query : item.queryEn;
 
         return (
           <Box
@@ -50,25 +50,22 @@ export default function ChatbotQuickPrompts({ onSelectPrompt }) {
               py: 0.65,
               borderRadius: '999px',
               border: '1px solid',
-              borderColor: (theme) =>
-                theme.palette.mode === 'dark'
-                  ? 'rgba(255, 255, 255, 0.12)'
-                  : 'rgba(0, 0, 0, 0.12)',
-              backgroundColor: (theme) =>
-                theme.palette.mode === 'dark' ? '#161d28' : '#ffffff',
-              color: 'text.secondary',
+              borderColor: isDark
+                ? 'rgba(255, 255, 255, 0.14)'
+                : 'rgba(0, 0, 0, 0.12)',
+              backgroundColor: isDark ? '#162238' : '#ffffff',
+              color: isDark ? '#e2e8f0' : '#334155',
               fontSize: '0.78rem',
               fontWeight: 600,
               whiteSpace: 'nowrap',
               cursor: 'pointer',
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               '&:hover': {
-                color: 'primary.main',
-                borderColor: 'primary.main',
-                backgroundColor: (theme) =>
-                  theme.palette.mode === 'dark'
-                    ? 'rgba(37, 99, 235, 0.12)'
-                    : 'rgba(37, 99, 235, 0.08)',
+                color: isDark ? '#38bdf8' : 'primary.main',
+                borderColor: isDark ? '#38bdf8' : 'primary.main',
+                backgroundColor: isDark
+                  ? 'rgba(56, 189, 248, 0.14)'
+                  : 'rgba(37, 99, 235, 0.08)',
                 transform: 'translateY(-1px)',
               },
             }}

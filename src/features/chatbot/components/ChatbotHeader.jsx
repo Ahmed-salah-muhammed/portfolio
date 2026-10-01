@@ -5,11 +5,11 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import RotateLeftRoundedIcon from '@mui/icons-material/RotateLeftRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import SmartToyOutlinedIcon from '@mui/icons-material/SmartToyOutlined';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import { CHATBOT_CONFIG } from '../chatbotData.js';
 import { useLanguage } from '@/i18n';
 
-export default function ChatbotHeader({ onReset, onClose }) {
+export default function ChatbotHeader({ isDark, onReset, onClose }) {
   const { lang } = useLanguage();
 
   return (
@@ -21,30 +21,26 @@ export default function ChatbotHeader({ onReset, onClose }) {
         px: 2.25,
         py: 1.75,
         borderBottom: '1px solid',
-        borderColor: 'divider',
-        backgroundColor: (theme) =>
-          theme.palette.mode === 'dark'
-            ? 'rgba(16, 20, 29, 0.95)'
-            : 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(12px)',
+        borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.08)',
+        backgroundColor: isDark ? '#111c30' : '#ffffff',
       }}
     >
       {/* Brand & Badge */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
         <Box
           sx={{
-            width: 38,
-            height: 38,
+            width: 40,
+            height: 40,
             borderRadius: '12px',
-            background: 'linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #4f46e5 100%)',
+            background: 'linear-gradient(135deg, #0284c7 0%, #4f46e5 50%, #9333ea 100%)',
             display: 'grid',
             placeItems: 'center',
             color: '#ffffff',
-            boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)',
+            boxShadow: '0 4px 14px rgba(79, 70, 229, 0.35)',
             flexShrink: 0,
           }}
         >
-          <SmartToyOutlinedIcon sx={{ fontSize: 22 }} />
+          <AutoAwesomeRoundedIcon sx={{ fontSize: 22 }} />
         </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
@@ -52,8 +48,8 @@ export default function ChatbotHeader({ onReset, onClose }) {
             variant="subtitle1"
             sx={{
               fontWeight: 800,
-              fontSize: '1.05rem',
-              color: 'text.primary',
+              fontSize: '1.08rem',
+              color: isDark ? '#f8fafc' : '#0f172a',
               letterSpacing: '-0.01em',
               whiteSpace: 'nowrap',
             }}
@@ -64,25 +60,23 @@ export default function ChatbotHeader({ onReset, onClose }) {
           <Box
             sx={{
               px: 1,
-              py: 0.25,
+              py: 0.3,
               borderRadius: '6px',
-              backgroundColor: (theme) =>
-                theme.palette.mode === 'dark'
-                  ? 'rgba(59, 130, 246, 0.18)'
-                  : 'rgba(59, 130, 246, 0.12)',
-              color: '#3b82f6',
+              backgroundColor: isDark
+                ? 'rgba(56, 189, 248, 0.16)'
+                : 'rgba(37, 99, 235, 0.1)',
+              color: isDark ? '#38bdf8' : '#2563eb',
               border: '1px solid',
-              borderColor: (theme) =>
-                theme.palette.mode === 'dark'
-                  ? 'rgba(59, 130, 246, 0.35)'
-                  : 'rgba(59, 130, 246, 0.25)',
+              borderColor: isDark
+                ? 'rgba(56, 189, 248, 0.35)'
+                : 'rgba(37, 99, 235, 0.25)',
               fontSize: '0.72rem',
               fontWeight: 700,
               letterSpacing: '0.02em',
               whiteSpace: 'nowrap',
             }}
           >
-            {CHATBOT_CONFIG.badge}
+            {lang === 'ar' ? 'المساعد الذكي' : CHATBOT_CONFIG.badge}
           </Box>
         </Box>
       </Box>
@@ -95,13 +89,13 @@ export default function ChatbotHeader({ onReset, onClose }) {
             onClick={onReset}
             aria-label="Restart conversation"
             sx={{
-              color: 'text.secondary',
+              color: isDark ? '#94a3b8' : '#64748b',
               p: 0.75,
               borderRadius: '8px',
               transition: 'all .2s ease',
               '&:hover': {
-                color: 'text.primary',
-                backgroundColor: 'action.hover',
+                color: isDark ? '#f8fafc' : '#0f172a',
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
                 transform: 'rotate(-45deg)',
               },
             }}
@@ -116,13 +110,13 @@ export default function ChatbotHeader({ onReset, onClose }) {
             onClick={onClose}
             aria-label="Close chat"
             sx={{
-              color: 'text.secondary',
+              color: isDark ? '#94a3b8' : '#64748b',
               p: 0.75,
               borderRadius: '8px',
               transition: 'all .2s ease',
               '&:hover': {
-                color: 'text.primary',
-                backgroundColor: 'action.hover',
+                color: isDark ? '#f8fafc' : '#0f172a',
+                backgroundColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
               },
             }}
           >

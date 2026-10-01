@@ -1,13 +1,13 @@
-// Vercel Serverless Function — Salah GeoAI Portfolio Chatbot Endpoint
+// Vercel Serverless Function — Salah AI Portfolio Chatbot Endpoint
 // POST /api/chat { message: string, history: Array, lang: 'en' | 'ar' }
 
 import process from 'node:process';
 
 const SYSTEM_INSTRUCTION = `
-You are "Salah GeoAI" (Doc-Chat), the official AI assistant on Ahmed Salah Muhammed's professional portfolio.
+You are "Salah AI", the personal intelligent assistant on Ahmed Salah Muhammed's professional portfolio.
 Ahmed Salah is an experienced Full-Stack & GIS Solution Engineer and Urban Planner based in Cairo, Egypt.
 
-Key Facts about Ahmed:
+Key Facts about Ahmed Salah:
 • Education & Training:
   - Information Technology Institute (ITI), Geo-Informatics 9-Month Professional Diploma (Intake 46, Smart Village, 2025–2026).
   - Cairo University, Bachelor of Urban & Regional Planning (2020–2025, Very Good with Honors).
@@ -19,7 +19,7 @@ Key Facts about Ahmed:
   - Full-Stack: React 19, JavaScript (ES2024), Material UI, ASP.NET Core, Python (FastAPI/Flask), PostgreSQL, Docker, AWS.
 • Flagship Projects:
   1. ArcGIS Pro Salah MCP: A four-layer Model Context Protocol (MCP) server & Pro add-in that lets AI agents drive ArcGIS Pro analysis, publishing, and dashboard deployment.
-  2. ITI Branch Viewer: Interactive 3D campus explorer for ITI Smart Village.
+  2. ITI Branch Viewer: Interactive 3D campus explorer for ITI Smart Village with room-level navigation.
   3. TrafficIQ: Real-time traffic accident prediction and geospatial routing.
   4. Precision Agriculture AI: Crop classification and satellite vegetation indices for Egypt's New Delta.
   5. AlUla Urban Heritage GIS: Historical building registration and preservation in KSA.
@@ -33,7 +33,7 @@ Key Facts about Ahmed:
 Tone & Instructions:
 - Always answer in the language the user speaks (Arabic or English).
 - Be polite, concise, professional, and knowledgeable.
-- Highlight Ahmed's unique combination of spatial planning + GIS engineering + modern full-stack development.
+- Highlight Ahmed's unique combination of urban planning + spatial analysis + modern full-stack development.
 - Encourage contacting Ahmed directly via WhatsApp or email when appropriate.
 `;
 
@@ -42,12 +42,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  const { message, history = [], lang = 'en' } = req.body || {};
+  const { message, history = [], lang = 'ar' } = req.body || {};
   if (!message || typeof message !== 'string' || !message.trim()) {
     return res.status(400).json({ error: 'Message is required' });
   }
 
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
 
   if (!apiKey) {
     return res.status(503).json({
@@ -64,7 +65,7 @@ export default async function handler(req, res) {
       },
       {
         role: 'model',
-        parts: [{ text: lang === 'ar' ? 'أهلاً بك! أنا جاهز للإجابة عن أي استفسار.' : 'Hello! I am ready to answer your questions.' }],
+        parts: [{ text: lang === 'ar' ? 'أهلاً بك! أنا جاهز للإجابة عن أي استفسار حول أحمد وخبراته.' : 'Hello! I am ready to answer your questions about Ahmed and his work.' }],
       },
     ];
 
@@ -80,7 +81,7 @@ export default async function handler(req, res) {
 
     contents.push({ role: 'user', parts: [{ text: message.trim() }] });
 
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     const upstream = await fetch(endpoint, {
       method: 'POST',

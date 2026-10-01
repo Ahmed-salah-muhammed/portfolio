@@ -1,24 +1,21 @@
 // src/features/chatbot/components/ChatbotFooter.jsx
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import HubRoundedIcon from '@mui/icons-material/HubRounded';
+import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
 import { CHATBOT_CONFIG } from '../chatbotData.js';
 import { useLanguage } from '@/i18n';
 
-export default function ChatbotFooter() {
+export default function ChatbotFooter({ isDark }) {
   const { lang } = useLanguage();
 
   return (
     <Box
       sx={{
         px: 2.25,
-        py: 1.2,
+        py: 1.25,
         borderTop: '1px solid',
-        borderColor: 'divider',
-        backgroundColor: (theme) =>
-          theme.palette.mode === 'dark'
-            ? 'rgba(16, 20, 29, 0.75)'
-            : 'rgba(248, 250, 252, 0.75)',
+        borderColor: isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)',
+        backgroundColor: isDark ? '#111c30' : '#f8fafc',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -41,29 +38,35 @@ export default function ChatbotFooter() {
           variant="caption"
           noWrap
           sx={{
-            color: 'text.secondary',
+            color: isDark ? '#94a3b8' : '#64748b',
             fontSize: '0.72rem',
             fontWeight: 500,
           }}
         >
-          {lang === 'ar' ? 'مساعد التوثيق الذكي' : CHATBOT_CONFIG.subFooterLeft}
+          {lang === 'ar' ? 'المساعد الذكي لبورتفوليو أحمد صلاح' : CHATBOT_CONFIG.subFooterLeft}
         </Typography>
       </Box>
 
       {/* Middle emblem */}
-      <HubRoundedIcon sx={{ fontSize: 15, color: 'text.disabled', flexShrink: 0 }} />
+      <AutoAwesomeRoundedIcon
+        sx={{
+          fontSize: 15,
+          color: isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.25)',
+          flexShrink: 0,
+        }}
+      />
 
       {/* Right brand support */}
       <Typography
         variant="caption"
         noWrap
         sx={{
-          color: 'text.secondary',
+          color: isDark ? '#94a3b8' : '#64748b',
           fontSize: '0.72rem',
           fontWeight: 600,
         }}
       >
-        {lang === 'ar' ? 'مدعوم بنواة Geo-GenAI' : CHATBOT_CONFIG.subFooterRight}
+        {lang === 'ar' ? 'مدعوم بـ Gemini 2.5 Flash' : CHATBOT_CONFIG.subFooterRight}
       </Typography>
     </Box>
   );

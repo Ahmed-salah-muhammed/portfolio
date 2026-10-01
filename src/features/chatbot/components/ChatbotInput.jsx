@@ -8,6 +8,7 @@ import SendRoundedIcon from '@mui/icons-material/SendRounded';
 import { useLanguage } from '@/i18n';
 
 export default function ChatbotInput({
+  isDark,
   input,
   setInput,
   onSend,
@@ -37,8 +38,8 @@ export default function ChatbotInput({
       ? 'جاري الاستماع... تحدّث الآن'
       : 'Listening... Speak now'
     : lang === 'ar'
-    ? 'اسأل عن المشاريع، نظم GIS، أو التسعير...'
-    : 'Ask about GeoGen AI, engines, or pricing...';
+    ? 'اسأل عن أحمد، مشاريع الـ GIS، أو التوظيف...'
+    : 'Ask about Ahmed, GIS projects, or hiring...';
 
   return (
     <Box sx={{ px: { xs: 2, sm: 2.25 }, pb: 1.5 }}>
@@ -49,21 +50,18 @@ export default function ChatbotInput({
           gap: 1,
           p: '4px 6px 4px 16px',
           borderRadius: '999px',
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'dark' ? '#141a24' : '#ffffff',
+          backgroundColor: isDark ? '#162238' : '#ffffff',
           border: '1.5px solid',
-          borderColor: (theme) =>
-            isListening
-              ? '#f87171'
-              : theme.palette.mode === 'dark'
-              ? 'rgba(255, 255, 255, 0.12)'
-              : 'rgba(0, 0, 0, 0.12)',
+          borderColor: isListening
+            ? '#f87171'
+            : isDark
+            ? 'rgba(255, 255, 255, 0.16)'
+            : 'rgba(0, 0, 0, 0.12)',
           boxShadow: isListening
             ? '0 0 0 3px rgba(248, 113, 113, 0.25), 0 0 16px rgba(248, 113, 113, 0.35)'
-            : (theme) =>
-                theme.palette.mode === 'dark'
-                  ? '0 4px 14px rgba(0, 0, 0, 0.25)'
-                  : '0 4px 14px rgba(15, 23, 42, 0.05)',
+            : isDark
+            ? '0 4px 14px rgba(0, 0, 0, 0.35)'
+            : '0 4px 14px rgba(15, 23, 42, 0.05)',
           transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         }}
       >
@@ -81,14 +79,14 @@ export default function ChatbotInput({
             border: 'none',
             outline: 'none',
             backgroundColor: 'transparent',
-            color: 'text.primary',
+            color: isDark ? '#f8fafc' : '#0f172a',
             fontSize: '0.88rem',
             fontFamily: 'inherit',
             lineHeight: 1.5,
             direction: isRTL ? 'rtl' : 'ltr',
             '&::placeholder': {
-              color: isListening ? '#f87171' : 'text.secondary',
-              opacity: isListening ? 1 : 0.8,
+              color: isListening ? '#f87171' : isDark ? '#94a3b8' : '#64748b',
+              opacity: isListening ? 1 : 0.85,
               fontStyle: isListening ? 'italic' : 'normal',
               transition: 'color .2s ease',
             },
@@ -115,21 +113,23 @@ export default function ChatbotInput({
               sx={{
                 p: 0.75,
                 borderRadius: '50%',
-                color: isListening ? '#ef4444' : 'text.secondary',
+                color: isListening ? '#ef4444' : isDark ? '#94a3b8' : '#64748b',
                 backgroundColor: isListening
-                  ? 'rgba(239, 68, 68, 0.14)'
+                  ? 'rgba(239, 68, 68, 0.16)'
                   : 'transparent',
                 transition: 'all .2s ease',
                 animation: isListening ? 'micPulse 1.5s infinite ease-in-out' : 'none',
                 '@keyframes micPulse': {
                   '0%, 100%': { transform: 'scale(1)' },
-                  '50%': { transform: 'scale(1.15)', backgroundColor: 'rgba(239, 68, 68, 0.25)' },
+                  '50%': { transform: 'scale(1.15)', backgroundColor: 'rgba(239, 68, 68, 0.28)' },
                 },
                 '&:hover': {
-                  color: isListening ? '#ef4444' : 'text.primary',
+                  color: isListening ? '#ef4444' : isDark ? '#f8fafc' : '#0f172a',
                   backgroundColor: isListening
-                    ? 'rgba(239, 68, 68, 0.2)'
-                    : 'action.hover',
+                    ? 'rgba(239, 68, 68, 0.22)'
+                    : isDark
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : 'rgba(0, 0, 0, 0.06)',
                 },
               }}
             >
@@ -163,11 +163,10 @@ export default function ChatbotInput({
                   transform: 'scale(1.05)',
                 },
                 '&.Mui-disabled': {
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === 'dark'
-                      ? 'rgba(255, 255, 255, 0.08)'
-                      : 'rgba(0, 0, 0, 0.08)',
-                  color: 'text.disabled',
+                  backgroundColor: isDark
+                    ? 'rgba(255, 255, 255, 0.08)'
+                    : 'rgba(0, 0, 0, 0.08)',
+                  color: isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.25)',
                   boxShadow: 'none',
                 },
               }}
