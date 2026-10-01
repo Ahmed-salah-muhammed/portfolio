@@ -15,7 +15,7 @@ export const components = {
           transitionDuration: '0.01ms !important',
         },
       },
-      body: { overflowX: 'hidden' },
+      body: { overflowX: 'clip' },
       // Links never look like classic hyperlinks — styling comes from the component.
       a: { color: 'inherit', textDecoration: 'none' },
       ':focus-visible': {
