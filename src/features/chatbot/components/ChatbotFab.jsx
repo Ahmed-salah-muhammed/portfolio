@@ -64,14 +64,14 @@ export default function ChatbotFab() {
             position: 'absolute',
             inset: -3,
             borderRadius: '50%',
-            background: 'var(--mui-palette-primary-main)',
-            opacity: isOpen ? 0.2 : isDark ? 0.45 : 0.4,
+            background: isDark ? '#4338ca' : '#5b5df4',
+            opacity: isOpen ? 0.2 : isDark ? 0.45 : 0.35,
             filter: 'blur(7px)',
             zIndex: -1,
             animation: 'haloPulse 2.8s ease-in-out infinite alternate',
             '@keyframes haloPulse': {
-              '0%': { transform: 'scale(0.96)', opacity: isDark ? 0.35 : 0.35 },
-              '100%': { transform: 'scale(1.06)', opacity: isDark ? 0.6 : 0.55 },
+              '0%': { transform: 'scale(0.96)', opacity: isDark ? 0.3 : 0.25 },
+              '100%': { transform: 'scale(1.06)', opacity: isDark ? 0.55 : 0.45 },
             },
           },
 
@@ -79,14 +79,14 @@ export default function ChatbotFab() {
             animationPlayState: 'paused',
             '& .fab-inner': {
               transform: 'scale(1.05)',
-              backgroundColor: 'var(--mui-palette-primary-dark)',
+              backgroundColor: isDark ? '#3730a3' : '#4b4de0',
               boxShadow: isDark
-                ? '0 12px 30px rgba(129, 140, 248, 0.45)'
-                : '0 12px 30px rgba(70, 72, 212, 0.45)',
+                ? '0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(67, 56, 202, 0.4)'
+                : '0 12px 30px rgba(91, 93, 244, 0.45)',
             },
             '&::before': {
               filter: 'blur(9px)',
-              opacity: isDark ? 0.75 : 0.7,
+              opacity: isDark ? 0.65 : 0.55,
             },
           },
           '&:active .fab-inner': {
@@ -100,17 +100,13 @@ export default function ChatbotFab() {
             width: '100%',
             height: '100%',
             borderRadius: '50%',
-            // Exact match to ScrollTopButton (<Fab color="primary">):
-            // Light mode: #4648d4 with #ffffff icon
-            // Dark mode: #818cf8 with #0b1120 icon
-            backgroundColor: 'var(--mui-palette-primary-main)',
-            color: 'var(--mui-palette-primary-contrastText)',
+            // Darkened in dark mode (#4338ca), softened in light mode (#5b5df4)
+            backgroundColor: isDark ? '#4338ca' : '#5b5df4',
+            color: '#ffffff',
             boxShadow: isDark
-              ? '0 10px 24px rgba(129, 140, 248, 0.35)'
-              : '0 10px 24px rgba(70, 72, 212, 0.35)',
-            border: isDark
-              ? '2px solid rgba(255, 255, 255, 0.35)'
-              : '2px solid rgba(255, 255, 255, 0.3)',
+              ? '0 10px 24px rgba(0, 0, 0, 0.38), 0 0 16px rgba(67, 56, 202, 0.3)'
+              : '0 10px 24px rgba(91, 93, 244, 0.35)',
+            border: '2px solid rgba(255, 255, 255, 0.35)',
             display: 'grid',
             placeItems: 'center',
             position: 'relative',
@@ -118,15 +114,13 @@ export default function ChatbotFab() {
           }}
         >
           {isOpen ? (
-            <CloseRoundedIcon sx={{ fontSize: 28 }} />
+            <CloseRoundedIcon sx={{ fontSize: 28, color: '#ffffff' }} />
           ) : (
             <AutoAwesomeRoundedIcon
               sx={{
                 fontSize: 30,
-                color: 'inherit',
-                filter: isDark
-                  ? 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25))'
-                  : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
+                color: '#ffffff', // Always pure white stars!
+                filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
               }}
             />
           )}
@@ -142,7 +136,7 @@ export default function ChatbotFab() {
                 height: 14,
                 borderRadius: '50%',
                 backgroundColor: '#10b981',
-                border: '2.5px solid var(--mui-palette-primary-main)',
+                border: isDark ? '2.5px solid #4338ca' : '2.5px solid #5b5df4',
                 boxShadow: '0 0 10px #10b981',
                 zIndex: 2,
                 animation: 'dotBlink 2s infinite ease-in-out',
