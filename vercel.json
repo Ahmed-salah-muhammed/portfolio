@@ -12,7 +12,7 @@
       "destination": "/api/chat"
     },
     {
-      "source": "/((?!assets/|images/|videos/|cv/|favicon|.*\\..*).*)",
+      "source": "/((?!api/|assets/|images/|videos/|cv/|favicon|.*\\..*).*)",
       "destination": "/index.html"
     }
   ],
