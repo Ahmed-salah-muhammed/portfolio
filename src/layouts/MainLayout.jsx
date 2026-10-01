@@ -3,6 +3,7 @@ import Box from '@mui/material/Box';
 import { Outlet } from 'react-router-dom';
 import Navbar, { TopBar } from '@/features/navbar';
 import Footer from '@/features/footer';
+import { Chatbot } from '@/features/chatbot';
 import { SectionSkeleton, ScrollTopButton } from '@/shared/components/ui';
 import useHashScroll from '@/hooks/useHashScroll.js';
 
@@ -20,6 +21,7 @@ export default function MainLayout() {
       </Box>
       <Footer />
       <ScrollTopButton />
+      <Chatbot />
     </Box>
   );
 }
