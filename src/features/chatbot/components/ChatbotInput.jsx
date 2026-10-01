@@ -154,12 +154,14 @@ export default function ChatbotInput({
                 width: 36,
                 height: 36,
                 borderRadius: '50%',
-                backgroundColor: '#2563eb',
-                color: '#ffffff',
-                boxShadow: '0 2px 8px rgba(37, 99, 235, 0.35)',
+                backgroundColor: 'var(--mui-palette-primary-main)',
+                color: 'var(--mui-palette-primary-contrastText)',
+                boxShadow: isDark
+                  ? '0 2px 8px rgba(129, 140, 248, 0.35)'
+                  : '0 2px 8px rgba(70, 72, 212, 0.35)',
                 transition: 'all .2s ease',
                 '&:hover': {
-                  backgroundColor: '#1d4ed8',
+                  backgroundColor: 'var(--mui-palette-primary-dark)',
                   transform: 'scale(1.05)',
                 },
                 '&.Mui-disabled': {

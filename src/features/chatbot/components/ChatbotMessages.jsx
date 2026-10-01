@@ -66,54 +66,58 @@ function MessageActionChip({ action, isDark, isRTL }) {
       sx={{
         mt: 1.4,
         width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+        minWidth: 0,
+        overflow: 'hidden',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 1.25,
-        px: 1.6,
+        px: 1.5,
         py: 1.1,
         borderRadius: '13px',
         textAlign: isRTL ? 'right' : 'left',
         cursor: 'pointer',
         border: '1px solid',
-        borderColor: isDark ? 'rgba(56, 189, 248, 0.35)' : 'rgba(37, 99, 235, 0.28)',
+        borderColor: isDark ? 'rgba(129, 140, 248, 0.35)' : 'rgba(70, 72, 212, 0.28)',
         background: isDark
           ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)'
-          : 'linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(240, 249, 255, 0.9) 100%)',
-        color: isDark ? '#38bdf8' : '#1d4ed8',
+          : 'linear-gradient(135deg, rgba(238, 240, 255, 0.95) 0%, rgba(245, 247, 255, 0.9) 100%)',
+        color: isDark ? '#a5b4fc' : '#4648d4',
         boxShadow: isDark
           ? '0 4px 14px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
-          : '0 4px 14px rgba(37, 99, 235, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+          : '0 4px 14px rgba(70, 72, 212, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
         transition: 'all 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
         '&:hover': {
           transform: 'translateY(-2px)',
-          borderColor: isDark ? '#38bdf8' : '#2563eb',
+          borderColor: isDark ? '#818cf8' : '#4648d4',
           boxShadow: isDark
-            ? '0 6px 20px rgba(56, 189, 248, 0.3)'
-            : '0 6px 20px rgba(37, 99, 235, 0.18)',
+            ? '0 6px 20px rgba(129, 140, 248, 0.3)'
+            : '0 6px 20px rgba(70, 72, 212, 0.18)',
           background: isDark
-            ? 'linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(99, 102, 241, 0.18) 100%)'
-            : 'linear-gradient(135deg, rgba(219, 234, 254, 0.98) 0%, rgba(224, 242, 254, 0.95) 100%)',
+            ? 'linear-gradient(135deg, rgba(129, 140, 248, 0.2) 0%, rgba(99, 102, 241, 0.18) 100%)'
+            : 'linear-gradient(135deg, rgba(224, 231, 255, 0.98) 0%, rgba(238, 242, 255, 0.95) 100%)',
         },
       }}
     >
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.15, minWidth: 0 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.15, minWidth: 0, overflow: 'hidden' }}>
         <Box
           sx={{
             width: 30,
             height: 30,
             borderRadius: '9px',
-            backgroundColor: isDark ? 'rgba(56, 189, 248, 0.18)' : 'rgba(37, 99, 235, 0.12)',
+            backgroundColor: isDark ? 'rgba(129, 140, 248, 0.18)' : 'rgba(70, 72, 212, 0.12)',
             display: 'grid',
             placeItems: 'center',
             flexShrink: 0,
-            color: isDark ? '#38bdf8' : '#2563eb',
+            color: isDark ? '#818cf8' : '#4648d4',
           }}
         >
           <IconComp sx={{ fontSize: 18 }} />
         </Box>
 
-        <Box sx={{ minWidth: 0 }}>
+        <Box sx={{ minWidth: 0, overflow: 'hidden' }}>
           {action.badge && (
             <Typography
               variant="caption"
@@ -150,7 +154,7 @@ function MessageActionChip({ action, isDark, isRTL }) {
         <ArrowBackRoundedIcon
           sx={{
             fontSize: 18,
-            color: isDark ? '#38bdf8' : '#2563eb',
+            color: isDark ? '#818cf8' : '#4648d4',
             flexShrink: 0,
             mr: 1.5,
             transition: 'transform 0.2s ease',
@@ -163,7 +167,7 @@ function MessageActionChip({ action, isDark, isRTL }) {
         <ArrowForwardRoundedIcon
           sx={{
             fontSize: 18,
-            color: isDark ? '#38bdf8' : '#2563eb',
+            color: isDark ? '#818cf8' : '#4648d4',
             flexShrink: 0,
             transition: 'transform 0.2s ease',
             '.MuiBox-root:hover &': {
@@ -183,7 +187,14 @@ function FormattedContent({ text, isUser, isError, isDark }) {
   const lines = text.split('\n');
 
   return (
-    <Box sx={{ fontSize: '0.9rem', lineHeight: 1.6, wordBreak: 'break-word' }}>
+    <Box
+      sx={{
+        fontSize: '0.9rem',
+        lineHeight: 1.6,
+        wordBreak: 'break-word',
+        overflowWrap: 'anywhere',
+      }}
+    >
       {lines.map((line, lineIdx) => {
         if (!line.trim()) {
           return <Box key={lineIdx} sx={{ height: 6 }} />;
@@ -218,12 +229,12 @@ function FormattedContent({ text, isUser, isError, isDark }) {
                 rel="noopener noreferrer"
                 sx={{
                   color: isUser
-                    ? '#ffffff'
+                    ? 'inherit'
                     : isError
                     ? 'inherit'
                     : isDark
-                    ? '#38bdf8'
-                    : 'primary.main',
+                    ? '#a5b4fc'
+                    : 'var(--mui-palette-primary-main)',
                   fontWeight: 700,
                   textDecoration: 'underline',
                   textUnderlineOffset: '3px',
@@ -257,6 +268,8 @@ function FormattedContent({ text, isUser, isError, isDark }) {
               fontSize: 'inherit',
               lineHeight: 'inherit',
               color: 'inherit',
+              overflowWrap: 'anywhere',
+              wordBreak: 'break-word',
             }}
           >
             {parts}
@@ -269,18 +282,20 @@ function FormattedContent({ text, isUser, isError, isDark }) {
 
 function TypingIndicator({ isDark }) {
   return (
-    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25, mb: 1.5 }}>
+    <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25, mb: 1.5, minWidth: 0 }}>
       <Box
         sx={{
           width: 34,
           height: 34,
           borderRadius: '10px',
-          background: 'linear-gradient(135deg, #0284c7 0%, #4f46e5 100%)',
+          backgroundColor: 'var(--mui-palette-primary-main)',
+          color: 'var(--mui-palette-primary-contrastText)',
           display: 'grid',
           placeItems: 'center',
-          color: '#ffffff',
           flexShrink: 0,
-          boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)',
+          boxShadow: isDark
+            ? '0 2px 8px rgba(129, 140, 248, 0.3)'
+            : '0 2px 8px rgba(70, 72, 212, 0.3)',
         }}
       >
         <AutoAwesomeRoundedIcon sx={{ fontSize: 18 }} />
@@ -345,16 +360,40 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
       sx={{
         flex: 1,
         overflowY: 'auto',
-        p: { xs: 2, sm: 2.5 },
+        overflowX: 'hidden !important',
+        width: '100%',
+        maxWidth: '100%',
+        boxSizing: 'border-box',
+        p: { xs: 2, sm: 2.25 },
         display: 'flex',
         flexDirection: 'column',
         gap: 2,
         backgroundColor: isDark ? '#0f172a' : '#f8fafc',
         scrollbarWidth: 'thin',
-        '&::-webkit-scrollbar': { width: 5 },
+        scrollbarColor: isDark
+          ? 'rgba(129, 140, 248, 0.35) transparent'
+          : 'rgba(70, 72, 212, 0.35) transparent',
+        '&::-webkit-scrollbar': {
+          width: 6,
+          height: 0,
+        },
+        '&::-webkit-scrollbar-track': {
+          background: 'transparent',
+        },
         '&::-webkit-scrollbar-thumb': {
-          backgroundColor: isDark ? 'rgba(255, 255, 255, 0.18)' : 'rgba(0, 0, 0, 0.15)',
+          backgroundColor: isDark ? 'rgba(129, 140, 248, 0.35)' : 'rgba(70, 72, 212, 0.35)',
           borderRadius: 999,
+          '&:hover': {
+            backgroundColor: isDark ? 'rgba(129, 140, 248, 0.65)' : 'rgba(70, 72, 212, 0.65)',
+          },
+        },
+        '&::-webkit-scrollbar-button': {
+          display: 'none',
+          width: 0,
+          height: 0,
+        },
+        '&::-webkit-scrollbar-corner': {
+          background: 'transparent',
         },
       }}
     >
@@ -370,8 +409,11 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: isRTL ? 'flex-start' : 'flex-end',
-                maxWidth: '85%',
+                maxWidth: { xs: '88%', sm: '82%' },
+                width: 'fit-content',
+                minWidth: 0,
                 alignSelf: isRTL ? 'flex-start' : 'flex-end',
+                boxSizing: 'border-box',
               }}
             >
               <Box
@@ -379,6 +421,8 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
                   display: 'flex',
                   alignItems: 'flex-end',
                   gap: 1,
+                  maxWidth: '100%',
+                  minWidth: 0,
                   flexDirection: isRTL ? 'row-reverse' : 'row',
                 }}
               >
@@ -387,9 +431,18 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
                     px: 2,
                     py: 1.25,
                     borderRadius: isRTL ? '16px 16px 16px 4px' : '16px 16px 4px 16px',
-                    backgroundColor: '#2563eb',
-                    color: '#ffffff',
-                    boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)',
+                    // Exact match to theme primary (like ScrollTopButton):
+                    // Light mode: #4648d4 with #ffffff text
+                    // Dark mode: #818cf8 with #0b1120 text
+                    backgroundColor: 'var(--mui-palette-primary-main)',
+                    color: 'var(--mui-palette-primary-contrastText)',
+                    boxShadow: isDark
+                      ? '0 4px 14px rgba(129, 140, 248, 0.25)'
+                      : '0 4px 14px rgba(70, 72, 212, 0.25)',
+                    minWidth: 0,
+                    maxWidth: 'calc(100% - 42px)',
+                    overflowWrap: 'anywhere',
+                    wordBreak: 'break-word',
                   }}
                 >
                   <FormattedContent text={msg.text} isUser isDark={isDark} />
@@ -400,12 +453,14 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
                     width: 32,
                     height: 32,
                     borderRadius: '10px',
-                    backgroundColor: '#2563eb',
-                    color: '#ffffff',
+                    backgroundColor: 'var(--mui-palette-primary-main)',
+                    color: 'var(--mui-palette-primary-contrastText)',
                     display: 'grid',
                     placeItems: 'center',
                     flexShrink: 0,
-                    boxShadow: '0 2px 8px rgba(37, 99, 235, 0.35)',
+                    boxShadow: isDark
+                      ? '0 2px 8px rgba(129, 140, 248, 0.25)'
+                      : '0 2px 8px rgba(70, 72, 212, 0.25)',
                   }}
                 >
                   <PersonRoundedIcon sx={{ fontSize: 20 }} />
@@ -438,8 +493,11 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: isRTL ? 'flex-end' : 'flex-start',
-                maxWidth: '92%',
+                maxWidth: { xs: '92%', sm: '88%' },
+                width: 'fit-content',
+                minWidth: 0,
                 alignSelf: isRTL ? 'flex-end' : 'flex-start',
+                boxSizing: 'border-box',
               }}
             >
               <Box
@@ -447,6 +505,8 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
                   display: 'flex',
                   alignItems: 'flex-start',
                   gap: 1.25,
+                  maxWidth: '100%',
+                  minWidth: 0,
                   flexDirection: isRTL ? 'row-reverse' : 'row',
                 }}
               >
@@ -481,6 +541,10 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
                       ? 'rgba(239, 68, 68, 0.45)'
                       : 'rgba(239, 68, 68, 0.45)',
                     color: isDark ? '#fca5a5' : '#dc2626',
+                    minWidth: 0,
+                    maxWidth: 'calc(100% - 46px)',
+                    overflowWrap: 'anywhere',
+                    wordBreak: 'break-word',
                   }}
                 >
                   <FormattedContent text={msg.text} isError isDark={isDark} />
@@ -513,8 +577,11 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
               display: 'flex',
               flexDirection: 'column',
               alignItems: isRTL ? 'flex-end' : 'flex-start',
-              maxWidth: '92%',
+              maxWidth: { xs: '94%', sm: '90%' },
+              width: 'fit-content',
+              minWidth: 0,
               alignSelf: isRTL ? 'flex-end' : 'flex-start',
+              boxSizing: 'border-box',
             }}
           >
             <Box
@@ -522,6 +589,8 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
                 display: 'flex',
                 alignItems: 'flex-start',
                 gap: 1.25,
+                maxWidth: '100%',
+                minWidth: 0,
                 flexDirection: isRTL ? 'row-reverse' : 'row',
               }}
             >
@@ -530,12 +599,14 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
                   width: 34,
                   height: 34,
                   borderRadius: '10px',
-                  background: 'linear-gradient(135deg, #0284c7 0%, #4f46e5 100%)',
+                  backgroundColor: 'var(--mui-palette-primary-main)',
+                  color: 'var(--mui-palette-primary-contrastText)',
                   display: 'grid',
                   placeItems: 'center',
-                  color: '#ffffff',
                   flexShrink: 0,
-                  boxShadow: '0 2px 8px rgba(2, 132, 199, 0.3)',
+                  boxShadow: isDark
+                    ? '0 2px 8px rgba(129, 140, 248, 0.3)'
+                    : '0 2px 8px rgba(70, 72, 212, 0.3)',
                 }}
               >
                 <AutoAwesomeRoundedIcon sx={{ fontSize: 18 }} />
@@ -555,6 +626,10 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
                   boxShadow: isDark
                     ? '0 4px 14px rgba(0, 0, 0, 0.35)'
                     : '0 4px 14px rgba(15, 23, 42, 0.05)',
+                  minWidth: 0,
+                  maxWidth: 'calc(100% - 46px)',
+                  overflowWrap: 'anywhere',
+                  wordBreak: 'break-word',
                 }}
               >
                 <FormattedContent text={msg.text} isDark={isDark} />

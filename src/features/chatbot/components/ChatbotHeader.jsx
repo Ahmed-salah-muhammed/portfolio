@@ -32,11 +32,13 @@ export default function ChatbotHeader({ isDark, onReset, onClose }) {
             width: 40,
             height: 40,
             borderRadius: '12px',
-            background: 'linear-gradient(135deg, #0284c7 0%, #4f46e5 50%, #9333ea 100%)',
+            backgroundColor: 'var(--mui-palette-primary-main)',
+            color: 'var(--mui-palette-primary-contrastText)',
             display: 'grid',
             placeItems: 'center',
-            color: '#ffffff',
-            boxShadow: '0 4px 14px rgba(79, 70, 229, 0.35)',
+            boxShadow: isDark
+              ? '0 4px 14px rgba(129, 140, 248, 0.35)'
+              : '0 4px 14px rgba(70, 72, 212, 0.35)',
             flexShrink: 0,
           }}
         >
@@ -63,13 +65,13 @@ export default function ChatbotHeader({ isDark, onReset, onClose }) {
               py: 0.3,
               borderRadius: '6px',
               backgroundColor: isDark
-                ? 'rgba(56, 189, 248, 0.16)'
-                : 'rgba(37, 99, 235, 0.1)',
-              color: isDark ? '#38bdf8' : '#2563eb',
+                ? 'rgba(129, 140, 248, 0.16)'
+                : 'rgba(70, 72, 212, 0.1)',
+              color: isDark ? '#a5b4fc' : '#4648d4',
               border: '1px solid',
               borderColor: isDark
-                ? 'rgba(56, 189, 248, 0.35)'
-                : 'rgba(37, 99, 235, 0.25)',
+                ? 'rgba(129, 140, 248, 0.35)'
+                : 'rgba(70, 72, 212, 0.25)',
               fontSize: '0.72rem',
               fontWeight: 700,
               letterSpacing: '0.02em',

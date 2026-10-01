@@ -51,29 +51,27 @@ export default function ChatbotFab() {
           display: 'grid',
           placeItems: 'center',
 
-          // Gentle floating bounce ("بيتنطط براحه كدا")
+          // Gentle floating bounce
           animation: isOpen ? 'none' : 'gentleFloat 3.4s ease-in-out infinite',
           '@keyframes gentleFloat': {
             '0%, 100%': { transform: 'translateY(0px)' },
             '50%': { transform: 'translateY(-8px)' },
           },
 
-          // Outer glowing boundary ring - subtle in dark mode, gentle in light mode
+          // Outer glowing boundary ring - matching ScrollTopButton primary accent
           '&::before': {
             content: '""',
             position: 'absolute',
             inset: -3,
             borderRadius: '50%',
-            background: isDark
-              ? 'linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #4f46e5 100%)'
-              : 'linear-gradient(135deg, #7dd3fc 0%, #93c5fd 50%, #c4b5fd 100%)',
-            opacity: isOpen ? 0.2 : isDark ? 0.38 : 0.75,
-            filter: isDark ? 'blur(6px)' : 'blur(7px)',
+            background: 'var(--mui-palette-primary-main)',
+            opacity: isOpen ? 0.2 : isDark ? 0.45 : 0.4,
+            filter: 'blur(7px)',
             zIndex: -1,
             animation: 'haloPulse 2.8s ease-in-out infinite alternate',
             '@keyframes haloPulse': {
-              '0%': { transform: 'scale(0.96)', opacity: isDark ? 0.28 : 0.55 },
-              '100%': { transform: 'scale(1.06)', opacity: isDark ? 0.48 : 0.85 },
+              '0%': { transform: 'scale(0.96)', opacity: isDark ? 0.35 : 0.35 },
+              '100%': { transform: 'scale(1.06)', opacity: isDark ? 0.6 : 0.55 },
             },
           },
 
@@ -81,13 +79,14 @@ export default function ChatbotFab() {
             animationPlayState: 'paused',
             '& .fab-inner': {
               transform: 'scale(1.05)',
+              backgroundColor: 'var(--mui-palette-primary-dark)',
               boxShadow: isDark
-                ? '0 12px 30px rgba(37, 99, 235, 0.45)'
-                : '0 12px 30px rgba(96, 165, 250, 0.45)',
+                ? '0 12px 30px rgba(129, 140, 248, 0.45)'
+                : '0 12px 30px rgba(70, 72, 212, 0.45)',
             },
             '&::before': {
               filter: 'blur(9px)',
-              opacity: isDark ? 0.6 : 0.95,
+              opacity: isDark ? 0.75 : 0.7,
             },
           },
           '&:active .fab-inner': {
@@ -101,21 +100,21 @@ export default function ChatbotFab() {
             width: '100%',
             height: '100%',
             borderRadius: '50%',
-            // Deep, sophisticated sapphire blue in dark mode, light fresh sky blue in light mode
-            background: isDark
-              ? 'linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 52%, #2563eb 100%)'
-              : 'linear-gradient(135deg, #38bdf8 0%, #60a5fa 48%, #818cf8 100%)',
-            border: isDark
-              ? '1.5px solid rgba(255, 255, 255, 0.28)'
-              : '2px solid rgba(255, 255, 255, 0.75)',
+            // Exact match to ScrollTopButton (<Fab color="primary">):
+            // Light mode: #4648d4 with #ffffff icon
+            // Dark mode: #818cf8 with #0b1120 icon
+            backgroundColor: 'var(--mui-palette-primary-main)',
+            color: 'var(--mui-palette-primary-contrastText)',
             boxShadow: isDark
-              ? '0 8px 24px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(37, 99, 235, 0.35)'
-              : '0 8px 24px rgba(56, 189, 248, 0.32)',
+              ? '0 10px 24px rgba(129, 140, 248, 0.35)'
+              : '0 10px 24px rgba(70, 72, 212, 0.35)',
+            border: isDark
+              ? '2px solid rgba(255, 255, 255, 0.35)'
+              : '2px solid rgba(255, 255, 255, 0.3)',
             display: 'grid',
             placeItems: 'center',
-            color: '#ffffff',
             position: 'relative',
-            transition: 'all 0.28s cubic-bezier(0.4, 0, 0.2, 1)',
+            transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         >
           {isOpen ? (
@@ -124,9 +123,10 @@ export default function ChatbotFab() {
             <AutoAwesomeRoundedIcon
               sx={{
                 fontSize: 30,
+                color: 'inherit',
                 filter: isDark
-                  ? 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45))'
-                  : 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25))',
+                  ? 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25))'
+                  : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
               }}
             />
           )}
@@ -142,7 +142,7 @@ export default function ChatbotFab() {
                 height: 14,
                 borderRadius: '50%',
                 backgroundColor: '#10b981',
-                border: isDark ? '2.5px solid #0f172a' : '2.5px solid #ffffff',
+                border: '2.5px solid var(--mui-palette-primary-main)',
                 boxShadow: '0 0 10px #10b981',
                 zIndex: 2,
                 animation: 'dotBlink 2s infinite ease-in-out',
