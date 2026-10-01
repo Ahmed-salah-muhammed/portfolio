@@ -150,10 +150,24 @@ export default function Hero() {
                 size="large"
                 endIcon={
                   <ArrowForwardRoundedIcon
-                    sx={{ transform: isRTL ? 'rotate(180deg)' : 'none' }}
+                    sx={{
+                      transform: isRTL ? 'rotate(180deg)' : 'none',
+                      transition: 'transform 0.25s ease',
+                    }}
                   />
                 }
                 onClick={() => scrollTo('projects')}
+                sx={{
+                  ...(isRTL && {
+                    '& .MuiButton-endIcon': {
+                      mr: 1.5,
+                      ml: -0.5,
+                    },
+                  }),
+                  '&:hover .MuiButton-endIcon': {
+                    transform: isRTL ? 'translateX(-5px)' : 'translateX(5px)',
+                  },
+                }}
               >
                 {t('hero.exploreBtn', 'View Projects')}
               </Button>

@@ -1,24 +1,45 @@
 // src/features/chatbot/useChatbot.js
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { WELCOME_MESSAGES, getLocalAnswer } from './chatbotData.js';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { WELCOME_MESSAGES, getLocalAnswer, detectSuggestedAction } from './chatbotData.js';
 import { useVoiceRecognition } from './useVoiceRecognition.js';
 
 const formatTime = () =>
   new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 export function useChatbot({ lang = 'en' } = {}) {
-  const [messages, setMessages] = useState(() => [
-    {
-      id: 'welcome-1',
-      sender: 'bot',
-      text: WELCOME_MESSAGES[lang] || WELCOME_MESSAGES.en,
-      timestamp: formatTime(),
-    },
-  ]);
+  const [messages, setMessages] = useState(() => {
+    const welcomeText = WELCOME_MESSAGES[lang] || WELCOME_MESSAGES.en;
+    return [
+      {
+        id: 'welcome-1',
+        sender: 'bot',
+        isWelcome: true,
+        text: welcomeText,
+        timestamp: formatTime(),
+        action: detectSuggestedAction(welcomeText, '', lang),
+      },
+    ];
+  });
 
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
+
+  // Dynamically synchronize the welcome message when user switches site language
+  // Pure derivation with zero setState in useEffect
+  const displayedMessages = useMemo(() => {
+    if (messages.length === 1 && messages[0].isWelcome) {
+      const welcomeText = WELCOME_MESSAGES[lang] || WELCOME_MESSAGES.en;
+      return [
+        {
+          ...messages[0],
+          text: welcomeText,
+          action: detectSuggestedAction(welcomeText, '', lang),
+        },
+      ];
+    }
+    return messages;
+  }, [messages, lang]);
 
   // Auto-scroll to latest message
   const scrollToBottom = useCallback((smooth = true) => {
@@ -32,7 +53,7 @@ export function useChatbot({ lang = 'en' } = {}) {
 
   useEffect(() => {
     scrollToBottom(true);
-  }, [messages, isTyping, scrollToBottom]);
+  }, [displayedMessages, isTyping, scrollToBottom]);
 
   // Voice recognition integration
   const voice = useVoiceRecognition({
@@ -74,13 +95,16 @@ export function useChatbot({ lang = 'en' } = {}) {
         if (response.ok) {
           const data = await response.json();
           if (data.reply) {
+            const replyText = data.reply;
+            const action = detectSuggestedAction(replyText, query, lang);
             setMessages((prev) => [
               ...prev,
               {
                 id: `bot-${Date.now()}`,
                 sender: 'bot',
-                text: data.reply,
+                text: replyText,
                 timestamp: formatTime(),
+                action,
               },
             ]);
             return;
@@ -89,11 +113,12 @@ export function useChatbot({ lang = 'en' } = {}) {
 
         const errorData = await response.json().catch(() => null);
 
-        // If the serverless API key isn't configured in production yet,
+        // If the serverless API key isn't configured in production yet or offline,
         // deliver the answer via our high-precision local knowledge engine
         if (errorData?.code === 'API_KEY_MISSING' || response.status === 503) {
-          await new Promise((r) => setTimeout(r, 650));
+          await new Promise((r) => setTimeout(r, 600));
           const localReply = getLocalAnswer(query, lang);
+          const action = detectSuggestedAction(localReply, query, lang);
           setMessages((prev) => [
             ...prev,
             {
@@ -101,12 +126,13 @@ export function useChatbot({ lang = 'en' } = {}) {
               sender: 'bot',
               text: localReply,
               timestamp: formatTime(),
+              action,
             },
           ]);
           return;
         }
 
-        // Show the exact styled error card from design
+        // Show styled error card
         setMessages((prev) => [
           ...prev,
           {
@@ -114,16 +140,19 @@ export function useChatbot({ lang = 'en' } = {}) {
             sender: 'error',
             text:
               errorData?.error ||
-              "Sorry, I couldn't reach the server. Please check your connection and try again.",
+              (lang === 'ar'
+                ? 'عذراً، لم أتمكن من الاتصال بالخادم. يرجى التحقق من الاتصال والمحاولة ثانية.'
+                : "Sorry, I couldn't reach the server. Please check your connection and try again."),
             timestamp: formatTime(),
           },
         ]);
       } catch (err) {
         console.warn('Chat request failed, trying local engine:', err);
-        // If completely offline or network error, fallback to local engine
+        // Fallback to local engine
         try {
-          await new Promise((r) => setTimeout(r, 600));
+          await new Promise((r) => setTimeout(r, 550));
           const localReply = getLocalAnswer(query, lang);
+          const action = detectSuggestedAction(localReply, query, lang);
           setMessages((prev) => [
             ...prev,
             {
@@ -131,6 +160,7 @@ export function useChatbot({ lang = 'en' } = {}) {
               sender: 'bot',
               text: localReply,
               timestamp: formatTime(),
+              action,
             },
           ]);
         } catch (fallbackErr) {
@@ -140,7 +170,10 @@ export function useChatbot({ lang = 'en' } = {}) {
             {
               id: `err-${Date.now()}`,
               sender: 'error',
-              text: "Sorry, I couldn't reach the server. Please check your connection and try again.",
+              text:
+                lang === 'ar'
+                  ? 'عذراً، حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'
+                  : "Sorry, I couldn't reach the server. Please check your connection and try again.",
               timestamp: formatTime(),
             },
           ]);
@@ -153,12 +186,15 @@ export function useChatbot({ lang = 'en' } = {}) {
   );
 
   const resetChat = useCallback(() => {
+    const welcomeText = WELCOME_MESSAGES[lang] || WELCOME_MESSAGES.en;
     setMessages([
       {
         id: `welcome-${Date.now()}`,
         sender: 'bot',
-        text: WELCOME_MESSAGES[lang] || WELCOME_MESSAGES.en,
+        isWelcome: true,
+        text: welcomeText,
         timestamp: formatTime(),
+        action: detectSuggestedAction(welcomeText, '', lang),
       },
     ]);
     setInput('');
@@ -169,7 +205,7 @@ export function useChatbot({ lang = 'en' } = {}) {
   }, [lang, voice]);
 
   return {
-    messages,
+    messages: displayedMessages,
     input,
     setInput,
     isTyping,
@@ -179,3 +215,4 @@ export function useChatbot({ lang = 'en' } = {}) {
     voice,
   };
 }
+

@@ -1,10 +1,181 @@
 // src/features/chatbot/components/ChatbotMessages.jsx
+import { useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import PersonRoundedIcon from '@mui/icons-material/PersonRounded';
 import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded';
 import AutoAwesomeRoundedIcon from '@mui/icons-material/AutoAwesomeRounded';
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded';
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
+import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined';
+import InsightsRoundedIcon from '@mui/icons-material/InsightsRounded';
+import ViewInArRoundedIcon from '@mui/icons-material/ViewInArRounded';
+import PublicRoundedIcon from '@mui/icons-material/PublicRounded';
+import TravelExploreRoundedIcon from '@mui/icons-material/TravelExploreRounded';
+import CodeRoundedIcon from '@mui/icons-material/CodeRounded';
+import WorkOutlineRoundedIcon from '@mui/icons-material/WorkOutlineRounded';
 import { useLanguage } from '@/i18n';
+
+const ACTION_ICONS = {
+  mcp: RocketLaunchOutlinedIcon,
+  traffic: InsightsRoundedIcon,
+  '3d': ViewInArRoundedIcon,
+  agriculture: PublicRoundedIcon,
+  heritage: PublicRoundedIcon,
+  flood: PublicRoundedIcon,
+  map: TravelExploreRoundedIcon,
+  skills: CodeRoundedIcon,
+  contact: WorkOutlineRoundedIcon,
+  experience: WorkOutlineRoundedIcon,
+  education: WorkOutlineRoundedIcon,
+  credentials: AutoAwesomeRoundedIcon,
+};
+
+function MessageActionChip({ action, isDark, isRTL }) {
+  const navigate = useNavigate();
+  if (!action) return null;
+
+  const IconComp = ACTION_ICONS[action.icon] || TravelExploreRoundedIcon;
+
+  const handleClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (action.type === 'route') {
+      navigate(action.target);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (action.type === 'section') {
+      if (window.location.pathname !== '/') {
+        navigate(`/#${action.target}`);
+      } else {
+        const el = document.getElementById(action.target);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          window.location.hash = action.target;
+        }
+      }
+    }
+  };
+
+  return (
+    <Box
+      component="button"
+      type="button"
+      onClick={handleClick}
+      sx={{
+        mt: 1.4,
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 1.25,
+        px: 1.6,
+        py: 1.1,
+        borderRadius: '13px',
+        textAlign: isRTL ? 'right' : 'left',
+        cursor: 'pointer',
+        border: '1px solid',
+        borderColor: isDark ? 'rgba(56, 189, 248, 0.35)' : 'rgba(37, 99, 235, 0.28)',
+        background: isDark
+          ? 'linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%)'
+          : 'linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(240, 249, 255, 0.9) 100%)',
+        color: isDark ? '#38bdf8' : '#1d4ed8',
+        boxShadow: isDark
+          ? '0 4px 14px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
+          : '0 4px 14px rgba(37, 99, 235, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
+        transition: 'all 0.22s cubic-bezier(0.4, 0, 0.2, 1)',
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          borderColor: isDark ? '#38bdf8' : '#2563eb',
+          boxShadow: isDark
+            ? '0 6px 20px rgba(56, 189, 248, 0.3)'
+            : '0 6px 20px rgba(37, 99, 235, 0.18)',
+          background: isDark
+            ? 'linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(99, 102, 241, 0.18) 100%)'
+            : 'linear-gradient(135deg, rgba(219, 234, 254, 0.98) 0%, rgba(224, 242, 254, 0.95) 100%)',
+        },
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.15, minWidth: 0 }}>
+        <Box
+          sx={{
+            width: 30,
+            height: 30,
+            borderRadius: '9px',
+            backgroundColor: isDark ? 'rgba(56, 189, 248, 0.18)' : 'rgba(37, 99, 235, 0.12)',
+            display: 'grid',
+            placeItems: 'center',
+            flexShrink: 0,
+            color: isDark ? '#38bdf8' : '#2563eb',
+          }}
+        >
+          <IconComp sx={{ fontSize: 18 }} />
+        </Box>
+
+        <Box sx={{ minWidth: 0 }}>
+          {action.badge && (
+            <Typography
+              variant="caption"
+              sx={{
+                display: 'block',
+                fontSize: '0.67rem',
+                fontWeight: 700,
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
+                color: isDark ? '#94a3b8' : '#64748b',
+                lineHeight: 1.1,
+                mb: 0.25,
+              }}
+            >
+              {action.badge}
+            </Typography>
+          )}
+          <Typography
+            variant="body2"
+            noWrap
+            sx={{
+              fontSize: '0.82rem',
+              fontWeight: 700,
+              color: isDark ? '#f8fafc' : '#0f172a',
+              lineHeight: 1.25,
+            }}
+          >
+            {action.label}
+          </Typography>
+        </Box>
+      </Box>
+
+      {isRTL ? (
+        <ArrowBackRoundedIcon
+          sx={{
+            fontSize: 18,
+            color: isDark ? '#38bdf8' : '#2563eb',
+            flexShrink: 0,
+            mr: 1.5,
+            transition: 'transform 0.2s ease',
+            '.MuiBox-root:hover &': {
+              transform: 'translateX(-4px)',
+            },
+          }}
+        />
+      ) : (
+        <ArrowForwardRoundedIcon
+          sx={{
+            fontSize: 18,
+            color: isDark ? '#38bdf8' : '#2563eb',
+            flexShrink: 0,
+            transition: 'transform 0.2s ease',
+            '.MuiBox-root:hover &': {
+              transform: 'translateX(3px)',
+            },
+          }}
+        />
+      )}
+    </Box>
+  );
+}
+
 
 function FormattedContent({ text, isUser, isError, isDark }) {
   if (!text) return null;
@@ -387,6 +558,9 @@ export default function ChatbotMessages({ isDark, messages, isTyping, endRef }) 
                 }}
               >
                 <FormattedContent text={msg.text} isDark={isDark} />
+                {msg.action && (
+                  <MessageActionChip action={msg.action} isDark={isDark} isRTL={isRTL} />
+                )}
               </Box>
             </Box>
 
