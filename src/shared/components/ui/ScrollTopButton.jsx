@@ -5,8 +5,8 @@ import KeyboardArrowUpRoundedIcon from '@mui/icons-material/KeyboardArrowUpRound
 import { useLanguage } from '@/i18n';
 
 /** Floating button that returns to the top once the visitor has scrolled. */
-export default function ScrollTopButton() {
-  const [scrolled, setScrolled] = useState(false);
+export default function ScrollTopButton({ threshold = 300 }) {
+  const [visible, setVisible] = useState(false);
   const { t, isRTL } = useLanguage();
 
   useEffect(() => {
@@ -18,7 +18,7 @@ export default function ScrollTopButton() {
       0;
 
     const onScroll = () => {
-      setScrolled(getScrollTop() > 60);
+      setVisible(getScrollTop() > threshold);
     };
 
     onScroll();
@@ -31,7 +31,7 @@ export default function ScrollTopButton() {
       document.removeEventListener('scroll', onScroll, { capture: true });
       window.removeEventListener('resize', onScroll);
     };
-  }, []);
+  }, [threshold]);
 
   const label = t('footer.backToTop', 'Back to top');
 
@@ -52,9 +52,11 @@ export default function ScrollTopButton() {
         [isRTL ? 'right' : 'left']: { xs: 20, sm: 30 },
         bottom: { xs: 22, sm: 30 },
         zIndex: 1200,
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        opacity: scrolled ? 1 : 0.9,
-        transform: scrolled ? 'scale(1)' : 'scale(0.96)',
+        transition: 'opacity 0.28s ease, transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.28s',
+        opacity: visible ? 1 : 0,
+        transform: visible ? 'scale(1) translateY(0)' : 'scale(0.5) translateY(14px)',
+        pointerEvents: visible ? 'auto' : 'none',
+        visibility: visible ? 'visible' : 'hidden',
       }}
     >
       <Tooltip title={label} placement={isRTL ? 'left' : 'right'}>
@@ -83,7 +85,7 @@ export default function ScrollTopButton() {
               inset: -3,
               borderRadius: '50%',
               background: 'var(--mui-palette-primary-main)',
-              opacity: scrolled ? 0.45 : 0.25,
+              opacity: visible ? 0.45 : 0.25,
               filter: 'blur(7px)',
               zIndex: -1,
               transition: 'opacity 0.25s ease',

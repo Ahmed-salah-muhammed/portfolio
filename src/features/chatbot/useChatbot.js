@@ -86,98 +86,94 @@ export function useChatbot({ lang = 'en' } = {}) {
       setIsTyping(true);
 
       try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: query, history: messages, lang }),
-        });
+        let replyText = null;
 
-        if (response.ok) {
-          const data = await response.json();
-          if (data.reply) {
-            const replyText = data.reply;
-            const action = detectSuggestedAction(replyText, query, lang);
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: `bot-${Date.now()}`,
-                sender: 'bot',
-                text: replyText,
-                timestamp: formatTime(),
-                action,
-              },
-            ]);
-            return;
+        // 1. Attempt serverless / local dev endpoint
+        try {
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: query, history: messages, lang }),
+          });
+
+          if (response.ok) {
+            const data = await response.json().catch(() => null);
+            if (data?.reply) {
+              replyText = data.reply;
+            }
+          }
+        } catch (apiErr) {
+          console.warn('API endpoint call failed, trying client fallback:', apiErr);
+        }
+
+        // 2. If endpoint failed, attempt direct client call if VITE_GEMINI_API_KEY is available
+        if (!replyText) {
+          const clientKey = import.meta.env.VITE_GEMINI_API_KEY;
+          const clientModel = import.meta.env.VITE_GEMINI_MODEL || 'gemini-2.5-flash';
+          if (clientKey) {
+            try {
+              const directRes = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${clientModel}:generateContent?key=${clientKey}`,
+                {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    contents: [
+                      {
+                        role: 'user',
+                        parts: [
+                          {
+                            text: `You are Salah AI on Ahmed Salah's portfolio (Full-stack GIS Solution Engineer & Urban Planner, ITI Intake 46, Cairo Univ Honors, AWS Certified, creator of ArcGIS Pro Salah MCP, TrafficIQ, ITI Branch Viewer, Precision Agriculture). Respond politely, concisely, and helpfully in ${lang === 'ar' ? 'Arabic' : 'English'}.\n\nUser Question: ${query}`,
+                          },
+                        ],
+                      },
+                    ],
+                  }),
+                },
+              );
+
+              if (directRes.ok) {
+                const directData = await directRes.json().catch(() => null);
+                replyText = directData?.candidates?.[0]?.content?.parts?.[0]?.text;
+              }
+            } catch (directErr) {
+              console.warn('Direct Gemini call failed:', directErr);
+            }
           }
         }
 
-        const errorData = await response.json().catch(() => null);
-
-        // If the serverless API key isn't configured in production yet or offline,
-        // deliver the answer via our high-precision local knowledge engine
-        if (errorData?.code === 'API_KEY_MISSING' || response.status === 503) {
-          await new Promise((r) => setTimeout(r, 600));
-          const localReply = getLocalAnswer(query, lang);
-          const action = detectSuggestedAction(localReply, query, lang);
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: `bot-${Date.now()}`,
-              sender: 'bot',
-              text: localReply,
-              timestamp: formatTime(),
-              action,
-            },
-          ]);
-          return;
+        // 3. High-precision Local Knowledge Engine Fallback
+        // If neither endpoint nor direct call returned a reply, ALWAYS deliver our verified knowledge answer!
+        if (!replyText) {
+          await new Promise((r) => setTimeout(r, 450));
+          replyText = getLocalAnswer(query, lang);
         }
 
-        // Show styled error card
+        const action = detectSuggestedAction(replyText, query, lang);
         setMessages((prev) => [
           ...prev,
           {
-            id: `err-${Date.now()}`,
-            sender: 'error',
-            text:
-              errorData?.error ||
-              (lang === 'ar'
-                ? 'عذراً، لم أتمكن من الاتصال بالخادم. يرجى التحقق من الاتصال والمحاولة ثانية.'
-                : "Sorry, I couldn't reach the server. Please check your connection and try again."),
+            id: `bot-${Date.now()}`,
+            sender: 'bot',
+            text: replyText,
             timestamp: formatTime(),
+            action,
           },
         ]);
       } catch (err) {
-        console.warn('Chat request failed, trying local engine:', err);
-        // Fallback to local engine
-        try {
-          await new Promise((r) => setTimeout(r, 550));
-          const localReply = getLocalAnswer(query, lang);
-          const action = detectSuggestedAction(localReply, query, lang);
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: `bot-${Date.now()}`,
-              sender: 'bot',
-              text: localReply,
-              timestamp: formatTime(),
-              action,
-            },
-          ]);
-        } catch (fallbackErr) {
-          console.warn('Local fallback error:', fallbackErr);
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: `err-${Date.now()}`,
-              sender: 'error',
-              text:
-                lang === 'ar'
-                  ? 'عذراً، حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'
-                  : "Sorry, I couldn't reach the server. Please check your connection and try again.",
-              timestamp: formatTime(),
-            },
-          ]);
-        }
+        console.warn('Chat handler error, delivering local knowledge:', err);
+        const localReply = getLocalAnswer(query, lang);
+        const action = detectSuggestedAction(localReply, query, lang);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: `bot-${Date.now()}`,
+            sender: 'bot',
+            text: localReply,
+            timestamp: formatTime(),
+            action,
+          },
+        ]);
       } finally {
         setIsTyping(false);
       }

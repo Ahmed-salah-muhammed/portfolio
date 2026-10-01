@@ -47,12 +47,18 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Message is required' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
-  const model = process.env.GEMINI_MODEL || 'gemini-1.5-flash';
+  const apiKey =
+    process.env.GEMINI_API_KEY ||
+    process.env.VITE_GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY;
+  const model =
+    process.env.GEMINI_MODEL ||
+    process.env.VITE_GEMINI_MODEL ||
+    'gemini-2.5-flash';
 
   if (!apiKey) {
     return res.status(503).json({
-      error: "Sorry, I couldn't reach the server. Please check your connection and try again.",
+      error: 'GEMINI_API_KEY not configured.',
       code: 'API_KEY_MISSING',
     });
   }
