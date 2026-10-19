@@ -14,7 +14,13 @@ import LanguageToggle from './LanguageToggle.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 import { useLanguage } from '@/i18n';
 
-export default function NavDrawer({ open, onClose, onNavigate, activeId }) {
+/**
+ * `returnFocusRef`: the button that opened the drawer. MUI's own focus restore calls a plain
+ * `focus()`, and because that button sits in the sticky header — inside the page's
+ * `scroll-padding-top` — the browser "reveals" it by scrolling the page up ~430px on every
+ * close. Focus is handed back here with `preventScroll` instead, once the drawer has left.
+ */
+export default function NavDrawer({ open, onClose, onNavigate, activeId, returnFocusRef }) {
   const { t, isRTL } = useLanguage();
 
   return (
@@ -22,7 +28,11 @@ export default function NavDrawer({ open, onClose, onNavigate, activeId }) {
       anchor={isRTL ? 'left' : 'right'}
       open={open}
       onClose={onClose}
-      slotProps={{ paper: { sx: { width: 290, px: 2, py: 2.5 } } }}
+      disableRestoreFocus
+      slotProps={{
+        paper: { sx: { width: 290, px: 2, py: 2.5 } },
+        transition: { onExited: () => returnFocusRef?.current?.focus({ preventScroll: true }) },
+      }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Monogram />

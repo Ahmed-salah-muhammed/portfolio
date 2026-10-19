@@ -18,6 +18,12 @@ There is no test suite. Verify UI changes in a browser, and always check both co
 - The first dev load after a fresh start (or after adding a dependency) is slow: Vite pre-bundles `@arcgis/core`. Requests during that window fail with `504 (Outdated Optimize Dep)` — just reload. `vite --force` rebuilds the dep cache.
 - The projects map takes ~8 s to draw its points even once loaded; a "Placing projects…" veil covers it.
 
+**Scroll / RTL gotchas (each was a real bug)**
+- Never put `overflow` on `<html>` (horizontal clipping lives on `body` only, in `src/index.css`). With `html { overflow-x: clip }` + `height: 100%`, MUI's scroll lock (`body { overflow: hidden }` while a Select/Menu/Dialog is open) collapsed the page and jumped it to the top.
+- Never hide things with `left: -9999px` (or any sideways offset). In Arabic (RTL) the left side is scrollable, so the page became ~10,000 px wide and phones zoomed out and shifted it. Hide by translating up, or with `clip-path: inset(50%)`.
+- A modal opened from the sticky header must restore focus with `focus({ preventScroll: true })` (see `NavDrawer` `returnFocusRef`): the header sits inside `scroll-padding-top`, so MUI's plain focus-restore scrolled the page ~430 px on close.
+- Deploy target is **Vercel** (`vercel.json`; `netlify.toml` is kept but unused). Do not set `cleanUrls: true` — it turns `/index.html` into a redirect, so the SPA rewrite to `/index.html` 404s and every deep link (`/projects/01/...`) breaks on reload.
+
 ## What this is
 
 A React 19 + Vite portfolio for Ahmed Salah (Full-Stack & GIS developer), **JavaScript only — no TypeScript**. UI is **Material UI + Emotion only (no Tailwind)**. Deploys to Netlify ([netlify.toml](netlify.toml): SPA redirect, asset caching, security headers).

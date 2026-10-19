@@ -299,8 +299,21 @@ export default function ContactForm() {
         </Box>
       </Box>
 
-      {/* Honeypot — invisible to people, tempting to bots. */}
-      <Box aria-hidden sx={{ position: 'absolute', left: '-9999px', width: 1, height: 1, overflow: 'hidden' }}>
+      {/* Honeypot — invisible to people, tempting to bots. Clipped in place rather than pushed
+          off-screen with `left: -9999px`, which widens the page in Arabic (RTL). */}
+      <Box
+        aria-hidden
+        sx={{
+          position: 'absolute',
+          width: 1,
+          height: 1,
+          overflow: 'hidden',
+          clipPath: 'inset(50%)',
+          whiteSpace: 'nowrap',
+          opacity: 0,
+          pointerEvents: 'none',
+        }}
+      >
         <label>
           Leave this field empty
           <input type="text" tabIndex={-1} autoComplete="off" {...register('website')} />

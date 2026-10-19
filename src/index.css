@@ -14,10 +14,11 @@ body,
   height: 100%;
 }
 
-html {
-  overflow-x: clip;
-}
-
+/* Horizontal clipping lives on <body> only — never on <html>. With <html> left `visible`, the
+   body's overflow is applied to the page (viewport) itself, so when an MUI menu or dialog
+   locks scrolling (inline `overflow: hidden` on <body>) the page simply pauses in place.
+   With `overflow-x: clip` on <html> that lock instead turned <body> into a one-screen-tall
+   box: the page collapsed and jumped to the top every time a menu opened. */
 body {
   margin: 0;
   overflow-x: clip;
@@ -82,22 +83,25 @@ video {
   max-width: 100%;
 }
 
-/* Skip link — visible only when focused. */
+/* Skip link — visible only when focused. Hidden by sliding it up, not sideways: in Arabic
+   (RTL) the left side is the scrollable side, so the old `left: -9999px` made the page
+   ~10,000px wide and phones zoomed out and shifted it. Above the page is never scrollable. */
 .skip-link {
   position: absolute;
-  left: -9999px;
   top: 0;
+  inset-inline-start: 0;
   z-index: 2000;
   padding: 12px 20px;
-  border-radius: 0 0 8px 0;
+  border-end-end-radius: 8px;
   background: var(--mui-palette-primary-main);
   color: var(--mui-palette-primary-contrastText);
   font-family: 'Inter', system-ui, sans-serif;
   font-weight: 600;
+  transform: translateY(-110%);
 }
 
 .skip-link:focus {
-  left: 0;
+  transform: none;
 }
 
 /* ArcGIS Map Web Components display and mobile touch support */

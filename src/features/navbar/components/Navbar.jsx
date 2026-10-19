@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Box from '@mui/material/Box';
@@ -37,6 +37,7 @@ export default function Navbar() {
   const { t, isRTL } = useLanguage();
 
   const [scrolled, setScrolled] = useState(false);
+  const menuButtonRef = useRef(null);
   const activeId = useScrollSpy(NAV_IDS, LAYOUT.navHeight + 60);
 
   useEffect(() => {
@@ -186,6 +187,7 @@ export default function Navbar() {
             </Button>
 
             <IconButton
+              ref={menuButtonRef}
               onClick={() => dispatch(openMobileNav())}
               aria-label="Open menu"
               sx={{ display: { lg: 'none' }, color: 'text.primary' }}
@@ -201,6 +203,7 @@ export default function Navbar() {
         onClose={() => dispatch(closeMobileNav())}
         onNavigate={goToSection}
         activeId={activeId}
+        returnFocusRef={menuButtonRef}
       />
     </>
   );
