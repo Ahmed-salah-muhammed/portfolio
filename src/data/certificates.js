@@ -171,6 +171,43 @@ export const CERTIFICATE_GALLERY = [
     image: img('aspire-leaders-program'),
     matches: 'Aspire Leaders Program 2026',
   },
+  // Esri Training — added Oct 2026 from the same Drive folder; fields read off each certificate.
+  {
+    id: 'esri-intro-ai',
+    title: 'Introduction to AI in ArcGIS',
+    issuer: 'Esri Training',
+    date: '2026-04',
+    detail: 'Web course · 1 h 5 min',
+    group: 'GIS',
+    image: img('esri-intro-ai-in-arcgis'),
+  },
+  {
+    id: 'esri-drone2map-basics',
+    title: 'ArcGIS Drone2Map Basics',
+    issuer: 'Esri Training',
+    date: '2026-10',
+    detail: 'Web course · 2 h 10 min',
+    group: 'GIS',
+    image: img('esri-drone2map-basics'),
+  },
+  {
+    id: 'esri-classifying-objects-dl',
+    title: 'Classifying Objects Using Deep Learning in ArcGIS Pro',
+    issuer: 'Esri Training',
+    date: '2026-10',
+    detail: 'ArcGIS Lab · 1 h 20 min',
+    group: 'GIS',
+    image: img('esri-classifying-objects-deep-learning'),
+  },
+  {
+    id: 'esri-deep-learning-pro',
+    title: 'Deep Learning Using ArcGIS Pro',
+    issuer: 'Esri Training',
+    date: '2026-10',
+    detail: 'Web course · 2 h 15 min',
+    group: 'GIS',
+    image: img('esri-deep-learning-arcgis-pro'),
+  },
 ];
 
 const covered = new Set(CERTIFICATE_GALLERY.map((c) => c.matches).filter(Boolean));
